@@ -20,7 +20,7 @@ public class SGDModelUpdator {
     }
     
     public void learn(List<ActionSet> traces) {
-        int count = 0;
+        int count = 1;
         for (ActionSet as : traces) {
             int index = getIndexOfTargetRule(as);
             Rule targetRule = rules.get(index);
@@ -33,6 +33,25 @@ public class SGDModelUpdator {
             count++;
         }
         SGDUtils.outputResult(rules, THRESHOLD);
+    }
+    
+    public void learn(List<ActionSet> traces, String exMode) {
+        if (exMode.equals("experiment1")) {
+            int count = 1;
+            SGDUtils.prepareValuesOfRules(rules);
+            for (ActionSet as : traces) {
+                int index = getIndexOfTargetRule(as);
+                Rule targetRule = rules.get(index);
+                targetRule = StochasticGradientDescent.getUpdatedRule(targetRule, as.getPostMonitorableAction());
+                if (isNecessaryOfUpdatingEnvironmentModel(targetRule)) {
+                    DomainModelGenerator generator = new DomainModelGenerator();
+                    generator.generate(rules, THRESHOLD, count, "SGD");
+                }
+                rules.set(index, targetRule);
+                SGDUtils.updateValuesOfRules(rules, count++);
+            }
+            SGDUtils.outputResult(rules, THRESHOLD);
+        }
     }
     
     private boolean isNecessaryOfUpdatingEnvironmentModel(Rule rule) {

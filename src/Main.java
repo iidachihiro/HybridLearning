@@ -1,9 +1,12 @@
+import java.io.File;
 import java.util.List;
 
 import core.ActionSet;
 import core.Rule;
 import model.gd.GDModelUpdator;
 import model.sgd.SGDModelUpdator;
+import util.GDUtils;
+import util.SGDUtils;
 import util.Utils;
 
 public class Main {
@@ -22,6 +25,15 @@ public class Main {
             GDModelUpdator updator = new GDModelUpdator(rules);
             updator.learn(sets);
             System.out.println("gd learning finished.");
+        } else if (args[0].equals("experiment1")) {
+            SGDModelUpdator SGDUpdator = new SGDModelUpdator(rules);
+            SGDUpdator.learn(sets, "experiment1");
+            rules = Utils.readBaseRules();
+            GDModelUpdator GDUpdator = new GDModelUpdator(rules);
+            GDUpdator.learn(sets, "experiment1");
+            Utils.mergeFiles_ValuesOfRules(new File(SGDUtils.getValuesOfRulesFilePath()), new File(GDUtils.getValuesOfRulesFilePath()), 
+                    rules, GDUpdator.getLearningSize(), sets.size());
+            System.out.println("experiment1 finished.");
         }
     }
 }

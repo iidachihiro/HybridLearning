@@ -18,6 +18,7 @@ public class SGDUtils extends Utils {
     private static String resultPath;
     private static String domainPath;
     private static String probabilityTablePath;
+    private static String valuesOfRulesFilePath;
     
     private static double learningRate = 0.1;
     private static double threshold = 0.1;
@@ -27,6 +28,7 @@ public class SGDUtils extends Utils {
         resultPath = outputPath+"Result_"+makeIdentificationPart()+".txt";
         domainPath = outputPath+"Domain_"+makeIdentificationPart()+".txt";
         probabilityTablePath = outputPath+"ProbabilityTable_"+makeIdentificationPart()+".csv";
+        valuesOfRulesFilePath = outputPath+"ValuesOfRules_"+makeIdentificationPart()+".csv";
     }    
     
     private static void setConfig() {
@@ -84,6 +86,10 @@ public class SGDUtils extends Utils {
     
     public static double getThreshold() {
         return threshold;
+    }
+    
+    public static String getValuesOfRulesFilePath() {
+        return valuesOfRulesFilePath;
     }
     
     public static void reflesh() {
@@ -185,15 +191,57 @@ public class SGDUtils extends Utils {
             }
             pw.println();
             pw.close();
+            System.out.println("Generated "+file.getName()+" file.");
         } catch (IOException e) {
             System.err.println(e.toString());
         }
-        System.out.println("Generate probability table file.");
     }
     
     public static void updateProbabilityTable(List<Rule> rules, int index) {
         try {
             File file = new File(probabilityTablePath);
+            PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(file, true)));
+            pw.print(index+",");
+            for (Rule rule : rules) {
+                for (Condition postCond : rule.getPostConditions()) {
+                    pw.print(postCond.getValue()+",");
+                }
+            }
+            pw.println();
+            pw.close();
+        } catch (IOException e) {
+            System.err.println(e.toString());
+        }
+    }
+    
+    public static void prepareValuesOfRules(List<Rule> rules) {
+        try {
+            File file = new File(valuesOfRulesFilePath);
+            PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+            pw.print("ActionSet,");
+            for (Rule rule : rules) {
+                for (Condition postCond : rule.getPostConditions()) {
+                    pw.print(rule.getPreConditionName()+" "+rule.getActionName()+" "+postCond.getName()+",");
+                }
+            }
+            pw.println();
+            pw.print("0,");
+            for (Rule rule : rules) {
+                for (Condition postCond : rule.getPostConditions()) {
+                    pw.print(postCond.getValue()+",");
+                }
+            }
+            pw.println();
+            pw.close();
+            System.out.println("Generated "+file.getName()+" file.");
+        } catch (IOException e) {
+            System.err.println(e.toString());
+        }
+    }
+    
+    public static void updateValuesOfRules(List<Rule> rules, int index) {
+        try {
+            File file = new File(valuesOfRulesFilePath);
             PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(file, true)));
             pw.print(index+",");
             for (Rule rule : rules) {
