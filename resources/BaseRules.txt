@@ -1,6 +1,6 @@
 arrive.w,move.e,arrive.m
-//arrive.w,move.e,arrive.e
-//arrive.w,move.e,arrive.w
+arrive.w,move.e,arrive.e
+arrive.w,move.e,arrive.w
 arrive.m,move.e,arrive.e
 arrive.m,move.e,arrive.m
 arrive.m,move.e,arrive.w
