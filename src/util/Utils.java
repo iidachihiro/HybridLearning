@@ -1,9 +1,12 @@
 package util;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,10 +23,13 @@ public class Utils {
     private static String baseActionsPath;
     protected static String outputPath;
     protected static String configPath;
+    private static String experiment1FilePath;
     
     protected static String traceFileName = "Traces.txt";
     private static String baseRulesFileName = "BaseRules.txt";
     private static String baseActionsFileName = "BaseActions.txt";
+    
+    private static String experiment1FileName = "experiment1.csv";
     
     protected final static String tab = "  ";
     
@@ -38,6 +44,8 @@ public class Utils {
         tracesPath = resourcesPath+traceFileName;
         baseRulesPath = resourcesPath+baseRulesFileName;
         baseActionsPath = resourcesPath+baseActionsFileName;
+        
+        experiment1FilePath = outputPath+experiment1FileName;
     }    
     
     private static void setConfig() {
@@ -206,5 +214,62 @@ public class Utils {
         }
         System.out.println("Read base actions file.");
         return rules;
+    }
+    
+    //file1 is SGD's, file2 is GD's
+    public static void mergeFiles_ValuesOfRules(File file1, File file2, List<Rule> rules, int GD_LEARNING_SIZE, int TRACE_SIZE) {
+        try {
+            BufferedReader br1 = new BufferedReader(new FileReader(file1));
+            BufferedReader br2 = new BufferedReader(new FileReader(file2));
+            File outputFile = new File(experiment1FilePath);
+            PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(outputFile)));
+            int rulesNum = 0;
+            pw.print("ActionSet,");
+            for (Rule rule : rules) {
+                for (Condition post : rule.getPostConditions()) {
+                    pw.print(rule.getPreConditionName()+" "+rule.getActionName()+" "+post.getName()+",,");
+                    rulesNum++;
+                }
+            }
+            pw.println();
+            for (int i = 0; i < rulesNum; i++) {
+                pw.print(",SGD,GD");
+            }
+            pw.println();
+            // title is ignored.
+            br1.readLine(); 
+            br2.readLine();
+            
+            String[] strs1 = br1.readLine().split(",");
+            String[] strs2 = br2.readLine().split(",");
+            pw.print("0");
+            for (int i = 1; i < strs1.length; i++) {
+                pw.print(","+strs1[i]+","+strs2[i]);
+            }
+            pw.println();
+            for (int i = 1; i < GD_LEARNING_SIZE; i++) {
+                strs1 = br1.readLine().split(",");
+                pw.print(i);
+                for (int j = 1; j < strs1.length; j++) {
+                    pw.print(","+strs1[j]+",");
+                }
+                pw.println();
+            }
+            for (int i = GD_LEARNING_SIZE; i <= TRACE_SIZE; i++) {
+                strs1 = br1.readLine().split(",");
+                strs2 = br2.readLine().split(",");
+                pw.print(i);
+                for (int j = 1; j < strs1.length; j++) {
+                    pw.print(","+strs1[j]+","+strs2[j]);
+                }
+                pw.println();
+            }
+            br1.close();
+            br2.close();
+            pw.close();
+            System.out.println("Merged "+file1.getName()+" and "+file2.getName()+" into "+outputFile.getName()+".");
+        } catch (IOException e) {
+            System.err.println(e.toString());
+        }
     }
 }

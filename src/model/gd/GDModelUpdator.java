@@ -23,19 +23,39 @@ public class GDModelUpdator {
         THRESHOLD = GDUtils.getThreshold();
     }
     
+    public int getLearningSize() {
+        return LEARNING_SIZE;
+    }
+    
     public void learn(List<ActionSet> sets) {
         this.traces = sets;
-        int count = LEARNING_SIZE;
         for (int i = LEARNING_SIZE; i < traces.size(); i++) {
             List<ActionSet> targetTraces = getLearningTargetTraces(i);
             this.rules = GradientDescent.getUpdatedRules(rules, targetTraces);
             if (isNecessaryOfUpdatingEnvironmentModel()) {
                 DomainModelGenerator generator = new DomainModelGenerator();
-                generator.generate(rules, THRESHOLD, count, "GD");
+                generator.generate(rules, THRESHOLD, i, "GD");
             }
-            count++;
         }
         GDUtils.outputResult(rules, THRESHOLD);
+    }
+    
+    public void learn(List<ActionSet> sets, String exMode) {
+        if (exMode.equals("experiment1")) {
+            this.traces.add(null);
+            this.traces.addAll(sets);
+            GDUtils.prepareValuesOfRules(rules);
+            for (int i = LEARNING_SIZE; i < traces.size(); i++) {
+                List<ActionSet> targetTraces = getLearningTargetTraces(i);
+                this.rules = GradientDescent.getUpdatedRules(rules, targetTraces);
+                if (isNecessaryOfUpdatingEnvironmentModel()) {
+                    DomainModelGenerator generator = new DomainModelGenerator();
+                    generator.generate(rules, THRESHOLD, i, "GD");
+                }
+                GDUtils.updateValuesOfRules(rules, i);
+            }
+            GDUtils.outputResult(rules, THRESHOLD);
+        }
     }
     
     private boolean isNecessaryOfUpdatingEnvironmentModel() {
@@ -53,7 +73,7 @@ public class GDModelUpdator {
     
     public List<ActionSet> getLearningTargetTraces(int i) {
         List<ActionSet> res = new ArrayList<>();
-        for (int j = i-LEARNING_SIZE; j < i; j++) {
+        for (int j = i-LEARNING_SIZE+1; j <= i; j++) {
             res.add(traces.get(j));
         }
         return res;
