@@ -45,6 +45,7 @@ public class Utils {
         baseRulesPath = resourcesPath+baseRulesFileName;
         baseActionsPath = resourcesPath+baseActionsFileName;
         
+        experiment1FileName = "experiment1_SGD("+SGDUtils.getLearningRate()+")_GD("+GDUtils.getLearningRate()+").csv";
         experiment1FilePath = outputPath+experiment1FileName;
     }    
     
@@ -227,13 +228,13 @@ public class Utils {
             pw.print("ActionSet,");
             for (Rule rule : rules) {
                 for (Condition post : rule.getPostConditions()) {
-                    pw.print(rule.getPreConditionName()+" "+rule.getActionName()+" "+post.getName()+",,");
+                    pw.print(rule.getPreConditionName()+" "+rule.getActionName()+" "+post.getName()+",,,");
                     rulesNum++;
                 }
             }
             pw.println();
             for (int i = 0; i < rulesNum; i++) {
-                pw.print(",SGD,GD");
+                pw.print(",SGD,GD,difference");
             }
             pw.println();
             // title is ignored.
@@ -244,14 +245,14 @@ public class Utils {
             String[] strs2 = br2.readLine().split(",");
             pw.print("0");
             for (int i = 1; i < strs1.length; i++) {
-                pw.print(","+strs1[i]+","+strs2[i]);
+                pw.print(","+strs1[i]+","+strs2[i]+","+String.valueOf((Double.valueOf(strs1[i])-Double.valueOf(strs2[i]))));
             }
             pw.println();
             for (int i = 1; i < GD_LEARNING_SIZE; i++) {
                 strs1 = br1.readLine().split(",");
                 pw.print(i);
                 for (int j = 1; j < strs1.length; j++) {
-                    pw.print(","+strs1[j]+",");
+                    pw.print(","+strs1[j]+",,");
                 }
                 pw.println();
             }
@@ -260,7 +261,7 @@ public class Utils {
                 strs2 = br2.readLine().split(",");
                 pw.print(i);
                 for (int j = 1; j < strs1.length; j++) {
-                    pw.print(","+strs1[j]+","+strs2[j]);
+                    pw.print(","+strs1[j]+","+strs2[j]+","+String.valueOf((Double.valueOf(strs1[j])-Double.valueOf(strs2[j]))));
                 }
                 pw.println();
             }
