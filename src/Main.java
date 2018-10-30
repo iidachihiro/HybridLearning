@@ -28,9 +28,11 @@ public class Main {
         } else if (args[0].equals("experiment1")) {
             SGDModelUpdator SGDUpdator = new SGDModelUpdator(rules);
             SGDUpdator.learn(sets, "experiment1");
+            SGDUpdator.printDomainModelUpdatedCount();
             rules = Utils.readBaseRules();
             GDModelUpdator GDUpdator = new GDModelUpdator(rules);
             GDUpdator.learn(sets, "experiment1");
+            GDUpdator.printDomainModelUpdatedCount();
             Utils.mergeFiles_ValuesOfRules(new File(SGDUtils.getValuesOfRulesFilePath()), new File(GDUtils.getValuesOfRulesFilePath()), 
                     rules, GDUpdator.getLearningSize(), sets.size());
             System.out.println("experiment1 finished.");

@@ -13,7 +13,7 @@ public class GradientDescent {
     
     public static List<Rule> getUpdatedRules(List<Rule> rules, List<ActionSet> observedData) {
         for (Rule rule : rules) {
-            total = rule.getTotalOfPostConditionValues();
+            total = 1;
             String preCondName = rule.getPreConditionName();
             String actionName = rule.getActionName();
             double[] sums = new double[rule.getPostConditions().size()];
@@ -34,11 +34,17 @@ public class GradientDescent {
                     continue;
                 }
             }
-            for (int i = 0; i < rule.getPostConditions().size(); i++) {
-                double value = rule.getPostCondition(i).getValue();
-                rule.getPostCondition(i).setValue(value-LEARNING_RATE*sums[i]/count);
+            if (count > 0) {
+                for (int i = 0; i < rule.getPostConditions().size(); i++) {
+                    double value = rule.getPostCondition(i).getValue();
+                    rule.getPostCondition(i).setValue(value-LEARNING_RATE*sums[i]/count);
+                }
+                rule = rule.normalize();
+            } else {
+                for (int i = 0; i < rule.getPostConditions().size(); i++) {
+                    rule.getPostCondition(i).setValue(rule.getPostCondition(i).getPreValue());
+                }
             }
-            rule = rule.normalize();
         }
         return rules;
     }
