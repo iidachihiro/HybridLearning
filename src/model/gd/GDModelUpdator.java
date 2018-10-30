@@ -15,6 +15,8 @@ public class GDModelUpdator {
     private double THRESHOLD;
     private int LEARNING_SIZE = 1500;
     
+    private int domainModelUpdatedCount = 0;
+    
     public GDModelUpdator(List<Rule> _rules) {
         this.rules = _rules;
         this.traces = new ArrayList<>();
@@ -51,6 +53,7 @@ public class GDModelUpdator {
                 if (isNecessaryOfUpdatingEnvironmentModel()) {
                     DomainModelGenerator generator = new DomainModelGenerator();
                     generator.generate(rules, THRESHOLD, i, "GD");
+                    this.domainModelUpdatedCount++;
                 }
                 GDUtils.updateValuesOfRules(rules, i);
             }
@@ -77,5 +80,9 @@ public class GDModelUpdator {
             res.add(traces.get(j));
         }
         return res;
+    }
+    
+    public void printDomainModelUpdatedCount() {
+        System.out.println("The number of updating domain model is "+this.domainModelUpdatedCount+".");
     }
 }

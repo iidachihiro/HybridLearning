@@ -12,6 +12,8 @@ public class SGDModelUpdator {
     private List<Rule> rules;
     private double THRESHOLD;
     
+    private int domainModelUpdatedCount = 0;
+    
     public SGDModelUpdator(List<Rule> _rules) {
         rules = _rules;
         new SGDUtils();
@@ -46,6 +48,7 @@ public class SGDModelUpdator {
                 if (isNecessaryOfUpdatingEnvironmentModel(targetRule)) {
                     DomainModelGenerator generator = new DomainModelGenerator();
                     generator.generate(rules, THRESHOLD, count, "SGD");
+                    this.domainModelUpdatedCount++;
                 }
                 rules.set(index, targetRule);
                 SGDUtils.updateValuesOfRules(rules, count++);
@@ -74,5 +77,9 @@ public class SGDModelUpdator {
             }
         }
         return -1;
+    }
+    
+    public void printDomainModelUpdatedCount() {
+        System.out.println("The number of updating domain model is "+this.domainModelUpdatedCount+".");
     }
 }
