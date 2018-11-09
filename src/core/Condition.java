@@ -13,6 +13,12 @@ public class Condition {
         preValue = INITIAL_VALUE;
     }
     
+    public Condition(String _name, Double _value) {
+        name = _name;
+        value = _value;
+        preValue = INITIAL_VALUE;
+    }
+    
     public void setValue(double _value) {
         this.value = _value;
     }
