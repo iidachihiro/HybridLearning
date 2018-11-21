@@ -3,6 +3,7 @@ import java.util.List;
 
 import core.ActionSet;
 import core.Rule;
+import detect.EnvironmentChangeDetector;
 import model.gd.GDModelUpdator;
 import model.sgd.SGDModelUpdator;
 import util.GDUtils;
@@ -36,6 +37,20 @@ public class Main {
             Utils.mergeFiles_ValuesOfRules(new File(SGDUtils.getValuesOfRulesFilePath()), new File(GDUtils.getValuesOfRulesFilePath()), 
                     rules, GDUpdator.getLearningSize(), sets.size());
             System.out.println("experiment1 finished.");
+        } else if (args[0].equals("experiment2")) {
+            String mode = args[1];
+            EnvironmentChangeDetector detector = new EnvironmentChangeDetector(rules);
+            if (mode.equals("mode4")) {
+                detector.detect4(sets);
+            } else if (mode.equals("mode5")) {
+                detector.detect5(sets);
+            } else if (mode.equals("mode6")) {
+                detector.detect6(sets);
+            } else if (mode.equals("mode7")) {
+                detector.detect7(sets);
+            } else {
+                detector.detect(sets, mode);
+            }
         }
     }
 }

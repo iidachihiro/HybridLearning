@@ -98,4 +98,13 @@ public class Rule {
         }
         return true;
     }
+    
+    public Rule clone() {
+        Rule rule = new Rule(this.preConditionName, this.actionName);
+        for (Condition postCondition : this.postConditions) {
+            Condition cond = new Condition(postCondition.getName(), postCondition.getValue());
+            rule.addNewPostCondition(cond);
+        }
+        return rule;
+    }
 }
