@@ -135,6 +135,264 @@ public class EnvironmentChangeDetector {
         }
     }
     
+    public void detect4(List<ActionSet> sets) {
+        this.traces = sets;
+        int count = 1;
+        //double[] pre_diffs = new double[DIFF_SIZE]; 
+        //double[] recent_diffs = new double[DIFF_SIZE]; 
+        List<double[]> recent_diffs_list = new ArrayList<>();
+        int len = 0;
+        for (Rule rule : rules_SGD) {
+            len += rule.getPostConditions().size();
+        }
+        for (int i = 0; i < len; i++) {
+            recent_diffs_list.add(new double[DIFF_SIZE*2]);
+        }
+        List<String> lines = new ArrayList<>();
+        
+        for (ActionSet as : traces) {
+            // SGD
+            int index = getIndexOfTargetRule(rules_SGD, as);
+            Rule targetRule = rules_SGD.get(index);
+            targetRule = StochasticGradientDescent.getUpdatedRule(targetRule, as.getPostMonitorableAction());
+            /*
+            if (isNecessaryOfUpdatingEnvironmentModel(targetRule, SGD_THRESHOLD)) {
+                DomainModelGenerator generator = new DomainModelGenerator();
+                generator.generate(rules_SGD, SGD_THRESHOLD, count, "SGD");
+            }
+            */
+            rules_SGD.set(index, targetRule);
+            count++;
+            if (count >= LEARNING_SIZE && count < traces.size()) {
+                // GD
+                List<ActionSet> targetTraces = getLearningTargetTraces(count);
+                this.rules_GD = GradientDescent.getUpdatedRules(rules_GD, targetTraces);
+                /*
+                if (isNecessaryOfUpdatingEnvironmentModel(rules_GD, GD_THRESHOLD)) {
+                    DomainModelGenerator generator = new DomainModelGenerator();
+                    generator.generate(rules_GD, GD_THRESHOLD, count, "GD");
+                }
+                */
+                // detect
+                int index_ = 0;
+
+                for (Rule rule : rules_SGD) {
+                    for (Condition post : rule.getPostConditions()) {
+                        double value_SGD = post.getValue();
+                        double value_GD = getValueOfNthPostCondition(rules_GD, index_);
+                        double diff = value_SGD-value_GD;
+                        recent_diffs_list.set(index_, replaceArray(recent_diffs_list.get(index_), diff));
+                        double variance1 = calculateVariance(recent_diffs_list.get(index_), 0, 10);
+                        double variance2 = calculateVariance(recent_diffs_list.get(index_), 10, 20);
+                        if (rule.getPreConditionName().equals("arrive.m") && rule.getActionName().equals("move.e")
+                                && post.getName().equals("arrive.e")) {
+                            //System.out.println(count+", "+variance1+", "+variance2);
+                            lines.add(count+", "+variance1+", "+variance2);
+                        }
+                        if (calculateRatio(variance1, variance2) >= Math.pow(10,  4)) {
+                            printEnvironmentalChanges(count-10, rule, post, value_SGD, value_GD);
+                        }
+                        index_++;
+                    }
+                }
+            }
+        }
+        makeTMPFile(lines, "/Users/iidachihiro/workspace/HybridLearning/output/tmp_mode4.txt");
+    }
+    
+    public void detect5(List<ActionSet> sets) {
+        this.traces = sets;
+        int count = 1;
+        //double[] pre_diffs = new double[DIFF_SIZE]; 
+        //double[] recent_diffs = new double[DIFF_SIZE]; 
+        List<double[]> recent_sgds_list = new ArrayList<>();
+        int len = 0;
+        for (Rule rule : rules_SGD) {
+            len += rule.getPostConditions().size();
+        }
+        for (int i = 0; i < len; i++) {
+            recent_sgds_list.add(new double[DIFF_SIZE*2]);
+        }
+        List<String> lines = new ArrayList<>();
+        
+        for (ActionSet as : traces) {
+            // SGD
+            int index = getIndexOfTargetRule(rules_SGD, as);
+            Rule targetRule = rules_SGD.get(index);
+            targetRule = StochasticGradientDescent.getUpdatedRule(targetRule, as.getPostMonitorableAction());
+            /*
+            if (isNecessaryOfUpdatingEnvironmentModel(targetRule, SGD_THRESHOLD)) {
+                DomainModelGenerator generator = new DomainModelGenerator();
+                generator.generate(rules_SGD, SGD_THRESHOLD, count, "SGD");
+            }
+            */
+            rules_SGD.set(index, targetRule);
+            count++;
+            if (count >= LEARNING_SIZE && count < traces.size()) {
+                // GD
+                List<ActionSet> targetTraces = getLearningTargetTraces(count);
+                this.rules_GD = GradientDescent.getUpdatedRules(rules_GD, targetTraces);
+                /*
+                if (isNecessaryOfUpdatingEnvironmentModel(rules_GD, GD_THRESHOLD)) {
+                    DomainModelGenerator generator = new DomainModelGenerator();
+                    generator.generate(rules_GD, GD_THRESHOLD, count, "GD");
+                }
+                */
+                // detect
+                int index_ = 0;
+
+                for (Rule rule : rules_SGD) {
+                    for (Condition post : rule.getPostConditions()) {
+                        double value_SGD = post.getValue();
+                        double value_GD = getValueOfNthPostCondition(rules_GD, index_);
+                        recent_sgds_list.set(index_, replaceArray(recent_sgds_list.get(index_), value_SGD));
+                        double variance1 = calculateVariance(recent_sgds_list.get(index_), 0, 10);
+                        double variance2 = calculateVariance(recent_sgds_list.get(index_), 10, 20);
+                        if (rule.getPreConditionName().equals("arrive.m") && rule.getActionName().equals("move.e")
+                                && post.getName().equals("arrive.e")) {
+                            //System.out.println(count+", "+variance1+", "+variance2);
+                            lines.add(count+", "+variance1+", "+variance2);
+                        }
+                        if (calculateRatio(variance1, variance2) >= Math.pow(10,  4)) {
+                            printEnvironmentalChanges(count-10, rule, post, value_SGD, value_GD);
+                        }
+                        index_++;
+                    }
+                }
+            }
+        }
+        makeTMPFile(lines, "/Users/iidachihiro/workspace/HybridLearning/output/tmp_mode5.txt");
+    }
+    
+    public void detect6(List<ActionSet> sets) {
+        this.traces = sets;
+        int count = 1;
+        //double[] pre_diffs = new double[DIFF_SIZE]; 
+        //double[] recent_diffs = new double[DIFF_SIZE]; 
+        List<double[]> recent_diffs_list = new ArrayList<>();
+        int len = 0;
+        for (Rule rule : rules_SGD) {
+            len += rule.getPostConditions().size();
+        }
+        for (int i = 0; i < len; i++) {
+            recent_diffs_list.add(new double[DIFF_SIZE*2]);
+        }
+        List<String> lines = new ArrayList<>();
+        
+        for (ActionSet as : traces) {
+            // SGD
+            int index = getIndexOfTargetRule(rules_SGD, as);
+            Rule targetRule = rules_SGD.get(index);
+            targetRule = StochasticGradientDescent.getUpdatedRule(targetRule, as.getPostMonitorableAction());
+            /*
+            if (isNecessaryOfUpdatingEnvironmentModel(targetRule, SGD_THRESHOLD)) {
+                DomainModelGenerator generator = new DomainModelGenerator();
+                generator.generate(rules_SGD, SGD_THRESHOLD, count, "SGD");
+            }
+            */
+            rules_SGD.set(index, targetRule);
+            count++;
+            if (count >= LEARNING_SIZE && count < traces.size()) {
+                // GD
+                List<ActionSet> targetTraces = getLearningTargetTraces(count);
+                this.rules_GD = GradientDescent.getUpdatedRules(rules_GD, targetTraces);
+                /*
+                if (isNecessaryOfUpdatingEnvironmentModel(rules_GD, GD_THRESHOLD)) {
+                    DomainModelGenerator generator = new DomainModelGenerator();
+                    generator.generate(rules_GD, GD_THRESHOLD, count, "GD");
+                }
+                */
+                // detect
+                int index_ = 0;
+
+                for (Rule rule : rules_SGD) {
+                    for (Condition post : rule.getPostConditions()) {
+                        double value_SGD = post.getValue();
+                        double value_GD = getValueOfNthPostCondition(rules_GD, index_);
+                        double diff = value_SGD-value_GD;
+                        recent_diffs_list.set(index_, replaceArray(recent_diffs_list.get(index_), diff));
+                        double variation1 = calculateVariationSum(recent_diffs_list.get(index_), 0, 10);
+                        double variation2 = calculateVariationSum(recent_diffs_list.get(index_), 10, 20);
+                        if (rule.getPreConditionName().equals("arrive.m") && rule.getActionName().equals("move.e")
+                                && post.getName().equals("arrive.e")) {
+                            //System.out.println(count+", "+variance1+", "+variance2);
+                            lines.add(count+", "+variation1+", "+variation2);
+                        }
+                        if (calculateRatio(variation1, variation2) >= 100) {
+                            printEnvironmentalChanges(count-10, rule, post, value_SGD, value_GD);
+                        }
+                        index_++;
+                    }
+                }
+            }
+        }
+        makeTMPFile(lines, "/Users/iidachihiro/workspace/HybridLearning/output/tmp_mode6.txt");
+    }
+    
+    public void detect7(List<ActionSet> sets) {
+        this.traces = sets;
+        int count = 1;
+        //double[] pre_diffs = new double[DIFF_SIZE]; 
+        //double[] recent_diffs = new double[DIFF_SIZE]; 
+        List<double[]> recent_sgds_list = new ArrayList<>();
+        int len = 0;
+        for (Rule rule : rules_SGD) {
+            len += rule.getPostConditions().size();
+        }
+        for (int i = 0; i < len; i++) {
+            recent_sgds_list.add(new double[DIFF_SIZE*2]);
+        }
+        List<String> lines = new ArrayList<>();
+        
+        for (ActionSet as : traces) {
+            // SGD
+            int index = getIndexOfTargetRule(rules_SGD, as);
+            Rule targetRule = rules_SGD.get(index);
+            targetRule = StochasticGradientDescent.getUpdatedRule(targetRule, as.getPostMonitorableAction());
+            /*
+            if (isNecessaryOfUpdatingEnvironmentModel(targetRule, SGD_THRESHOLD)) {
+                DomainModelGenerator generator = new DomainModelGenerator();
+                generator.generate(rules_SGD, SGD_THRESHOLD, count, "SGD");
+            }
+            */
+            rules_SGD.set(index, targetRule);
+            count++;
+            if (count >= LEARNING_SIZE && count < traces.size()) {
+                // GD
+                List<ActionSet> targetTraces = getLearningTargetTraces(count);
+                this.rules_GD = GradientDescent.getUpdatedRules(rules_GD, targetTraces);
+                /*
+                if (isNecessaryOfUpdatingEnvironmentModel(rules_GD, GD_THRESHOLD)) {
+                    DomainModelGenerator generator = new DomainModelGenerator();
+                    generator.generate(rules_GD, GD_THRESHOLD, count, "GD");
+                }
+                */
+                // detect
+                int index_ = 0;
+
+                for (Rule rule : rules_SGD) {
+                    for (Condition post : rule.getPostConditions()) {
+                        double value_SGD = post.getValue();
+                        double value_GD = getValueOfNthPostCondition(rules_GD, index_);
+                        recent_sgds_list.set(index_, replaceArray(recent_sgds_list.get(index_), value_SGD));
+                        double variation1 = calculateVariationSum(recent_sgds_list.get(index_), 0, 10);
+                        double variation2 = calculateVariationSum(recent_sgds_list.get(index_), 10, 20);
+                        if (rule.getPreConditionName().equals("arrive.m") && rule.getActionName().equals("move.e")
+                                && post.getName().equals("arrive.e")) {
+                            //System.out.println(count+", "+variance1+", "+variance2);
+                            lines.add(count+", "+variation1+", "+variation2);
+                        }
+                        if (calculateRatio(variation1, variation2) >= 100) {
+                            printEnvironmentalChanges(count-10, rule, post, value_SGD, value_GD);
+                        }
+                        index_++;
+                    }
+                }
+            }
+        }
+        makeTMPFile(lines, "/Users/iidachihiro/workspace/HybridLearning/output/tmp_mode7.txt");
+    }
+    
     private int getIndexOfTargetRule(List<Rule> rules, ActionSet as) {
         for (int i = 0; i < rules.size(); i++) {
             Rule rule = rules.get(i);
@@ -247,4 +505,55 @@ public class EnvironmentChangeDetector {
         square_average /= len;
         return square_average - Math.pow(average,  2);
     }
+    
+    private double calculateVariance(double[] array_, int start, int end) {
+        double[] array = new double[end-start];
+        for (int i = start; i < end; i++) {
+            array[i-start] = array_[i]; 
+        }
+        double average = 0;
+        double square_average = 0;
+        int len = array.length;
+        for (int i = 0; i < len; i++) {
+            average += array[i];
+            square_average += Math.pow(array[i],  2);
+        }
+        average /= len;
+        square_average /= len;
+        return square_average - Math.pow(average,  2);
+    }
+    
+    private double calculateVariationSum(double[] array_, int start, int end) {    
+        double[] array = new double[end-start];
+        for (int i = start; i < end; i++) {
+            array[i-start] = array_[i]; 
+        }
+        double result = 0;
+        for (int i = 0; i < array.length-1; i++) {
+            result += Math.abs(array[i+1]-array[i]);
+        }
+        return result;
+    }
+    
+    private void makeTMPFile(List<String> lines, String path) {
+        File file = new File(path);
+        try {
+            PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+            for (String line : lines) {
+                pw.println(line);
+            }
+            pw.close();
+        } catch (IOException e) {
+            System.err.println(e.toString());
+        }
+        System.out.println("Created "+file.getName()+"!!");
+    }
+    
+    private double calculateRatio(double a, double b) {
+        if (a == 0 || b == 0) { 
+        return 0;
+        }
+        if (a >= b) return a/b;
+        else return b/a;
+    } 
 }

@@ -40,7 +40,17 @@ public class Main {
         } else if (args[0].equals("experiment2")) {
             String mode = args[1];
             EnvironmentChangeDetector detector = new EnvironmentChangeDetector(rules);
-            detector.detect(sets, mode);
+            if (mode.equals("mode4")) {
+                detector.detect4(sets);
+            } else if (mode.equals("mode5")) {
+                detector.detect5(sets);
+            } else if (mode.equals("mode6")) {
+                detector.detect6(sets);
+            } else if (mode.equals("mode7")) {
+                detector.detect7(sets);
+            } else {
+                detector.detect(sets, mode);
+            }
         }
     }
 }
