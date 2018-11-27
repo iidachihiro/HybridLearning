@@ -5,6 +5,7 @@ import core.ActionSet;
 import core.Rule;
 import detect.EnvironmentChangeDetector;
 import model.gd.GDModelUpdator;
+import model.hybrid.HybridModelUpdator;
 import model.sgd.SGDModelUpdator;
 import util.GDUtils;
 import util.SGDUtils;
@@ -59,9 +60,18 @@ public class Main {
             GDModelUpdator GDUpdator = new GDModelUpdator(rules);
             GDUpdator.learn(sets, "experiment1");
             GDUpdator.printDomainModelUpdatedCount();
-            Utils.outputErrorValues(new File(SGDUtils.getValuesOfRulesFilePath()), new File(GDUtils.getValuesOfRulesFilePath()), 
+            Utils.outputErrorValues_EX3(new File(SGDUtils.getValuesOfRulesFilePath()), new File(GDUtils.getValuesOfRulesFilePath()), 
                     new File(Utils.getResourcesPath()+"True_Probability_TIRE5_C_v5.csv"), GDUpdator.getLearningSize(), sets.size());
             System.out.println("experiment3 finished.");
+        } else if (args[0].equals("experiment4")) {
+            HybridModelUpdator HUpdator = new HybridModelUpdator(rules);
+            int[] detectedPoints = new int[args.length-1];
+            for (int i = 0; i < detectedPoints.length; i++) {
+                detectedPoints[i] = Integer.valueOf(args[i+1]);
+            }
+            HUpdator.learn1(sets, detectedPoints);
+            Utils.outputErrorValues_EX4(new File(Utils.getResourcesPath()+"True_Probability_TIRE5_C_v5.csv"), HUpdator);
+            System.out.println("experiment4 finished.");
         }
     }
 }
