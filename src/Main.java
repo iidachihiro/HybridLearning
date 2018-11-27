@@ -51,6 +51,17 @@ public class Main {
             } else {
                 detector.detect(sets, mode);
             }
+        } else if (args[0].equals("experiment3")) {
+            SGDModelUpdator SGDUpdator = new SGDModelUpdator(rules);
+            SGDUpdator.learn(sets, "experiment1");
+            SGDUpdator.printDomainModelUpdatedCount();
+            rules = Utils.readBaseRules();
+            GDModelUpdator GDUpdator = new GDModelUpdator(rules);
+            GDUpdator.learn(sets, "experiment1");
+            GDUpdator.printDomainModelUpdatedCount();
+            Utils.outputErrorValues(new File(SGDUtils.getValuesOfRulesFilePath()), new File(GDUtils.getValuesOfRulesFilePath()), 
+                    new File(Utils.getResourcesPath()+"True_Probability_TIRE5_C_v5.csv"), GDUpdator.getLearningSize(), sets.size());
+            System.out.println("experiment3 finished.");
         }
     }
 }

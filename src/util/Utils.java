@@ -24,12 +24,15 @@ public class Utils {
     protected static String outputPath;
     protected static String configPath;
     private static String experiment1FilePath;
+    private static String errorFilePath;
     
     protected static String traceFileName = "Traces.txt";
     private static String baseRulesFileName = "BaseRules.txt";
     private static String baseActionsFileName = "BaseActions.txt";
     
     private static String experiment1FileName = "experiment1.csv";
+    
+    private static String errorFileName = "ErrorValues.csv";
     
     protected final static String tab = "  ";
     
@@ -47,6 +50,8 @@ public class Utils {
         
         experiment1FileName = "experiment1_SGD("+SGDUtils.getLearningRate()+")_GD("+GDUtils.getLearningRate()+").csv";
         experiment1FilePath = outputPath+experiment1FileName;
+        
+        errorFilePath = outputPath+errorFileName;
     }    
     
     private static void setConfig() {
@@ -269,6 +274,96 @@ public class Utils {
             br2.close();
             pw.close();
             System.out.println("Merged "+file1.getName()+" and "+file2.getName()+" into "+outputFile.getName()+".");
+        } catch (IOException e) {
+            System.err.println(e.toString());
+        }
+    }
+    
+    //file1 is SGD's, file2 is GD's, file3 is true probability file.
+    public static void outputErrorValues(File file1, File file2, File file3, int GD_LEARNING_SIZE, int TRACE_SIZE) {
+        try {
+            BufferedReader br1 = new BufferedReader(new FileReader(file1));
+            BufferedReader br2 = new BufferedReader(new FileReader(file2));
+            BufferedReader br3 = new BufferedReader(new FileReader(file3));
+            // read file3
+            String line = br3.readLine();
+            String[] strs = line.split(",");
+            int num = Integer.valueOf(strs[0]);
+            int[] points = new int[strs.length-1];
+            for (int i = 1; i < strs.length; i++) {
+                points[i-1] = Integer.valueOf(strs[i]);
+            }
+            double[][] probabilities = new double[num][points.length];
+            for (int i = 0; i < num; i++) {
+                line = br3.readLine();
+                strs = line.split(",");
+                for (int j = 0; j < points.length; j++) {
+                    probabilities[i][j] = Double.valueOf(strs[j+1]);
+                }
+            }
+            br3.close();
+            // read file1
+            double[] aveErrors1 = new double[TRACE_SIZE];
+            line = br1.readLine();
+            int p = 0;
+            for (int i = 0; i < TRACE_SIZE; i++) {
+                if (p < points.length && i == points[p] && p != 0) {
+                    p++;
+                }
+                line = br1.readLine();
+                strs = line.split(",");
+                double aveError = 0;
+                int count = 0;
+                for (int j = 0; j < num; j++) {
+                    double value = Double.valueOf(strs[j+1]);
+                    if (value != 0.5) {
+                        aveError += Math.abs(value-probabilities[j][p]);
+                        count++;
+                    }
+                }
+                if (count == 0) {
+                    aveErrors1[i] = 0;
+                } else {
+                    aveErrors1[i] = aveError/num;
+                }
+            }
+            br1.close();
+            // read file2
+            double[] aveErrors2 = new double[TRACE_SIZE];
+            line = br2.readLine();
+            p = 0;
+            for (int i = GD_LEARNING_SIZE; i < TRACE_SIZE; i++) {
+                if (p < points.length && i == points[p] && p != 0) {
+                    p++;
+                }
+                line = br2.readLine();
+                strs = line.split(",");
+                double aveError = 0;
+                int count = 0;
+                for (int j = 0; j < num; j++) {
+                    double value = Double.valueOf(strs[j+1]);
+                    if (value != 0.5) {
+                        aveError += Math.abs(value-probabilities[j][p]);
+                        count++;
+                    }
+                }
+                if (count == 0) {
+                    aveErrors1[i] = 0;
+                } else {
+                    aveErrors2[i] = aveError/num;
+                }
+            }
+            br2.close();
+            // write errorsFile
+            PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(new File(errorFilePath))));
+            pw.println(",SGD,GD");
+            for (int i = 0; i < GD_LEARNING_SIZE; i++) {
+                pw.println(i+","+aveErrors1[i]);
+            }
+            for (int i = GD_LEARNING_SIZE; i < TRACE_SIZE; i++) {
+                pw.println(i+","+aveErrors1[i]+","+aveErrors2[i]);
+            }
+            pw.close();
         } catch (IOException e) {
             System.err.println(e.toString());
         }
