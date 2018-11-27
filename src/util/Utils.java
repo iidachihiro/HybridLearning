@@ -14,6 +14,7 @@ import java.util.List;
 import core.ActionSet;
 import core.Condition;
 import core.Rule;
+import model.hybrid.HybridModelUpdator;
 
 public class Utils {
     private static String originalPath;
@@ -24,7 +25,8 @@ public class Utils {
     protected static String outputPath;
     protected static String configPath;
     private static String experiment1FilePath;
-    private static String errorFilePath;
+    private static String errorEX3FilePath;
+    private static String errorEX4FilePath;
     
     protected static String traceFileName = "Traces.txt";
     private static String baseRulesFileName = "BaseRules.txt";
@@ -32,7 +34,8 @@ public class Utils {
     
     private static String experiment1FileName = "experiment1.csv";
     
-    private static String errorFileName = "ErrorValues.csv";
+    private static String errorEX3FileName = "ErrorValues_ex3.csv";
+    private static String errorEX4FileName = "ErrorValues_ex4.csv";
     
     protected final static String tab = "  ";
     
@@ -51,7 +54,8 @@ public class Utils {
         experiment1FileName = "experiment1_SGD("+SGDUtils.getLearningRate()+")_GD("+GDUtils.getLearningRate()+").csv";
         experiment1FilePath = outputPath+experiment1FileName;
         
-        errorFilePath = outputPath+errorFileName;
+        errorEX3FilePath = outputPath+errorEX3FileName;
+        errorEX4FilePath = outputPath+errorEX4FileName;
     }    
     
     private static void setConfig() {
@@ -280,7 +284,7 @@ public class Utils {
     }
     
     //file1 is SGD's, file2 is GD's, file3 is true probability file.
-    public static void outputErrorValues(File file1, File file2, File file3, int GD_LEARNING_SIZE, int TRACE_SIZE) {
+    public static void outputErrorValues_EX3(File file1, File file2, File file3, int GD_LEARNING_SIZE, int TRACE_SIZE) {
         try {
             BufferedReader br1 = new BufferedReader(new FileReader(file1));
             BufferedReader br2 = new BufferedReader(new FileReader(file2));
@@ -348,20 +352,68 @@ public class Utils {
                     }
                 }
                 if (count == 0) {
-                    aveErrors1[i] = 0;
+                    aveErrors2[i] = 0;
                 } else {
                     aveErrors2[i] = aveError/num;
                 }
             }
             br2.close();
             // write errorsFile
-            PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(new File(errorFilePath))));
+            PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(new File(errorEX3FilePath))));
             pw.println(",SGD,GD");
             for (int i = 0; i < GD_LEARNING_SIZE; i++) {
                 pw.println(i+","+aveErrors1[i]);
             }
             for (int i = GD_LEARNING_SIZE; i < TRACE_SIZE; i++) {
                 pw.println(i+","+aveErrors1[i]+","+aveErrors2[i]);
+            }
+            pw.close();
+        } catch (IOException e) {
+            System.err.println(e.toString());
+        }
+    }
+    
+    public static void outputErrorValues_EX4(File file, HybridModelUpdator HUpdator) {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            // read true probability file
+            String line = br.readLine();
+            String[] strs = line.split(",");
+            int num = Integer.valueOf(strs[0]);
+            int[] points = new int[strs.length-1];
+            for (int i = 1; i < strs.length; i++) {
+                points[i-1] = Integer.valueOf(strs[i]);
+            }
+            double[][] true_probabilities = new double[num][points.length];
+            for (int i = 0; i < num; i++) {
+                line = br.readLine();
+                strs = line.split(",");
+                for (int j = 0; j < points.length; j++) {
+                    true_probabilities[i][j] = Double.valueOf(strs[j+1]);
+                }
+            }
+            br.close();
+            // write
+            PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(new File(errorEX4FilePath))));
+            List<List<Double>> probabilities = HUpdator.getProbabilities();
+            int point_index = 0;
+            for (int i = 0; i < probabilities.size(); i++) {
+                if (i != 0 && point_index < points.length && points[point_index] == i) {
+                    point_index++;
+                }
+                double aveError = 0;
+                int count = 0;
+                for (int j = 0; j < num; j++) {
+                    double value = probabilities.get(i).get(j);
+                    if (value != 0.5) {
+                        aveError += Math.abs(true_probabilities[j][point_index]-value);
+                        count++;
+                    }
+                }
+                if (count != 0) {
+                    aveError /= count;
+                }
+                pw.println(i+","+aveError);
             }
             pw.close();
         } catch (IOException e) {

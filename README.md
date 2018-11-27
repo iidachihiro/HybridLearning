@@ -37,4 +37,10 @@
 トレース生成時に使用した真の確率と、GDやSGDで計算される尤度の差の平均値を出力する。
 
 `$ java -cp bin Main experiment3` <br>
-誤差平均値を出力する。`output/ErrorValues.csv`をxlsx形式に直してグラフ出力とかする。
+誤差平均値を出力する。`output/ErrorValues_ex3.csv`をxlsx形式に直してグラフ出力とかする。
+
+## Experiment4
+環境変化ポイントが分かっている前提で、そこからGDの計算に必要な分だけのデータ量が溜まったら一度GDに切り替える。そのあとまたSGDで計算する。 <br>
+
+`$ java -cp bin Main experiment4 point1 point2 ...` <br>
+出力は誤差平均値。point1, point2, ...には、真の確率ファイルで設定した環境が変化するポイントのアクションセットを書く。
