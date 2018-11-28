@@ -8,6 +8,7 @@ import core.Condition;
 import core.Rule;
 import model.gd.GradientDescent;
 import model.sgd.StochasticGradientDescent;
+import util.GDUtils;
 
 public class HybridModelUpdator {
     private List<Rule> rules;
@@ -15,10 +16,12 @@ public class HybridModelUpdator {
     
     private List<List<Double>> probabilities;
     
-    private int LEARNING_SIZE = 1500;
+    private int LEARNING_SIZE;
     
     public HybridModelUpdator(List<Rule> _rules) {
         this.rules = _rules;
+        new GDUtils();
+        LEARNING_SIZE = GDUtils.getLearningSize();
     }
     
     public List<List<Double>> getProbabilities() {

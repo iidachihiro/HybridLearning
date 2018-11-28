@@ -23,6 +23,8 @@ public class GDUtils extends Utils {
     private static double learningRate = 0.1;
     private static double threshold = 0.1;
     
+    private static int LEARNING_SIZE = 1500;
+    
     public GDUtils() {
         setConfig();
         resultPath = outputPath+"Result_"+makeIdentificationPart()+".txt";
@@ -90,6 +92,10 @@ public class GDUtils extends Utils {
     
     public static String getValuesOfRulesFilePath() {
         return valuesOfRulesFilePath;
+    }
+    
+    public static int getLearningSize() {
+        return LEARNING_SIZE;
     }
     
     public static void reflesh() {

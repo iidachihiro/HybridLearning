@@ -13,7 +13,7 @@ public class GDModelUpdator {
     private List<Rule> rules;
     private List<ActionSet> traces;
     private double THRESHOLD;
-    private int LEARNING_SIZE = 1500;
+    private int LEARNING_SIZE;
     
     private int domainModelUpdatedCount = 0;
     
@@ -23,6 +23,7 @@ public class GDModelUpdator {
         new GDUtils();
         GDUtils.reflesh();
         THRESHOLD = GDUtils.getThreshold();
+        LEARNING_SIZE = GDUtils.getLearningSize();
     }
     
     public int getLearningSize() {

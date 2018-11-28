@@ -27,11 +27,9 @@ public class EnvironmentChangeDetector {
     private double THRESHOLD = 0.1;
     private double DIFF_THRESHOLD = 1000;
     
-    private int LEARNING_SIZE = 1500;
+    private int LEARNING_SIZE;
     
     private int DIFF_SIZE = 10;
-    
-    private String filePath;
     
     public EnvironmentChangeDetector(List<Rule> rules) {
         this.rules_SGD = new ArrayList<>();
@@ -45,6 +43,7 @@ public class EnvironmentChangeDetector {
         GDUtils.reflesh();
         GD_THRESHOLD = GDUtils.getThreshold();
         THRESHOLD = (SGD_THRESHOLD+GD_THRESHOLD)/2;
+        LEARNING_SIZE = GDUtils.getLearningSize();
     }
     
     public void detect(List<ActionSet> sets, String mode) {
@@ -455,14 +454,6 @@ public class EnvironmentChangeDetector {
             result.add(newRule);
         }
         return result;
-    }
-    
-    private double calculateAverage(double[] array) {
-        double ave = 0;
-        for (double a : array) {
-            ave += a;
-        }
-        return ave/array.length;
     }
     
     private double[] replaceArray(double[] array, double value) {
