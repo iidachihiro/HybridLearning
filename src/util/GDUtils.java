@@ -31,7 +31,7 @@ public class GDUtils extends Utils {
         domainPath = outputPath+"Domain_"+makeIdentificationPart()+".txt";
         probabilityTablePath = outputPath+"ProbabilityTable_"+makeIdentificationPart()+".csv";
         valuesOfRulesFilePath = outputPath+"ValuesOfRules_"+makeIdentificationPart()+".csv";
-    }    
+    }
     
     private static void setConfig() {
         try {

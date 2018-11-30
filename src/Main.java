@@ -61,7 +61,7 @@ public class Main {
             GDUpdator.learn(sets, "experiment1");
             GDUpdator.printDomainModelUpdatedCount();
             Utils.outputErrorValues_EX3(new File(SGDUtils.getValuesOfRulesFilePath()), new File(GDUtils.getValuesOfRulesFilePath()), 
-                    new File(Utils.getResourcesPath()+"True_Probability_TIRE5_C_v5.csv"), GDUpdator.getLearningSize(), sets.size());
+                    GDUpdator.getLearningSize(), sets.size());
             System.out.println("experiment3 finished.");
         } else if (args[0].equals("experiment4")) {
             HybridModelUpdator HUpdator = new HybridModelUpdator(rules);
@@ -70,7 +70,8 @@ public class Main {
                 detectedPoints[i] = Integer.valueOf(args[i+1]);
             }
             HUpdator.learn1(sets, detectedPoints);
-            Utils.outputErrorValues_EX4(new File(Utils.getResourcesPath()+"True_Probability_TIRE5_C_v5.csv"), HUpdator);
+            Utils.outputErrorValues_EX4(HUpdator);
+            Utils.mergeFile_EX4();
             System.out.println("experiment4 finished.");
         }
     }

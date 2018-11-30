@@ -3,15 +3,23 @@
 自分用
 
 ## リソース
+### 環境1
+
 - `TIRE5_C_v5_Traces.txt` <br>
 下図の環境のトレース。[TraceGenrator](https://github.com/iidachihiro/TraceGenerator)から生成する。
 - `PC_TIRE5_C_v5.csv` <br>
 下図の環境を表現する確率表 <br>
 [TraceGenrator](https://github.com/iidachihiro/TraceGenerator)で要求される形式に依存
-- `True_Probability_TIRE5_C_v5.csv`
+- `True_Probability_TIRE5_C_v5.csv` <br>
 下図の環境を表現する確率表 <br>
 上記ファイルと`BaseRules.txt`から自動生成したいが、現状手作業で作成している。
-![表されている環境](/resources/images/EnvironmentalChangesSample.png)
+![v5](/resources/images/Environment_v5.png)
+
+### 環境2
+- `TIRE5_C_v6_Traces.txt` <br>
+- `True_Probability_TIRE5_C_v6.csv`
+![v6](/resources/images/Environment_v6.png)
+
 
 ## 引数
 - gd: 勾配効果法
@@ -40,7 +48,12 @@
 誤差平均値を出力する。`output/ErrorValues_ex3.csv`をxlsx形式に直してグラフ出力とかする。
 
 ## Experiment4
-環境変化ポイントが分かっている前提で、そこからGDの計算に必要な分だけのデータ量が溜まったら一度GDに切り替える。そのあとまたSGDで計算する。 <br>
+HybrindLearningの実験。環境変化ポイントが分かっている前提で、そこからGDの計算に必要な分だけのデータ量が溜まったら一度GDに切り替える。そのあとまたSGDで計算する。 <br>
 
-`$ java -cp bin Main experiment4 point1 point2 ...` <br>
-出力は誤差平均値。point1, point2, ...には、真の確率ファイルで設定した環境が変化するポイントのアクションセットを書く。
+`$ java -cp bin Main experiment4 0 point1 point2 ...` <br>
+出力は誤差平均値。point1, point2, ...には、真の確率ファイルで設定した環境が変化するポイントのアクションセットを書く。 <br>
+事前に実験3で生成したファイルとマージするので、まず実験3をやっておく必要がある。
+
+## pythonディレクトリ
+`python ex4.py` <br>
+実験4で生成した`../ouput/ErrorValues.csv`からグラフを生成する。

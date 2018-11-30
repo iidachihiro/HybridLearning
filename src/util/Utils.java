@@ -21,14 +21,17 @@ public class Utils {
     private static String resourcesPath;
     private static String baseRulesPath;
     private static String tracesPath;
+    private static String trueProbabilityPath;
     private static String baseActionsPath;
     protected static String outputPath;
     protected static String configPath;
     private static String experiment1FilePath;
     private static String errorEX3FilePath;
     private static String errorEX4FilePath;
+    private static String errorEX3EX4FilePath;
     
     protected static String traceFileName = "Traces.txt";
+    protected static String trueProbabilityFileName;
     private static String baseRulesFileName = "BaseRules.txt";
     private static String baseActionsFileName = "BaseActions.txt";
     
@@ -36,6 +39,7 @@ public class Utils {
     
     private static String errorEX3FileName = "ErrorValues_ex3.csv";
     private static String errorEX4FileName = "ErrorValues_ex4.csv";
+    private static String errorEX3EX4FileName = "ErrorValues.csv";
     
     protected final static String tab = "  ";
     
@@ -48,6 +52,7 @@ public class Utils {
         
         setConfig();
         tracesPath = resourcesPath+traceFileName;
+        trueProbabilityPath = resourcesPath+trueProbabilityFileName;
         baseRulesPath = resourcesPath+baseRulesFileName;
         baseActionsPath = resourcesPath+baseActionsFileName;
         
@@ -56,6 +61,7 @@ public class Utils {
         
         errorEX3FilePath = outputPath+errorEX3FileName;
         errorEX4FilePath = outputPath+errorEX4FileName;
+        errorEX3EX4FilePath = outputPath+errorEX3EX4FileName;
     }    
     
     private static void setConfig() {
@@ -70,6 +76,8 @@ public class Utils {
                     baseRulesFileName = line.substring("BaseRulesFileName=".length());
                 } else if (line.startsWith("BaseActionsFileName")) {
                     baseActionsFileName = line.substring("BaseACtionsFileName=".length());
+                } else if (line.startsWith("TrueProbabilityFileName=")) {
+                    trueProbabilityFileName = line.substring("TrueProbabilityFileName=".length());
                 }
             }
             br.close();
@@ -284,11 +292,11 @@ public class Utils {
     }
     
     //file1 is SGD's, file2 is GD's, file3 is true probability file.
-    public static void outputErrorValues_EX3(File file1, File file2, File file3, int GD_LEARNING_SIZE, int TRACE_SIZE) {
+    public static void outputErrorValues_EX3(File file1, File file2, int GD_LEARNING_SIZE, int TRACE_SIZE) {
         try {
             BufferedReader br1 = new BufferedReader(new FileReader(file1));
             BufferedReader br2 = new BufferedReader(new FileReader(file2));
-            BufferedReader br3 = new BufferedReader(new FileReader(file3));
+            BufferedReader br3 = new BufferedReader(new FileReader(new File(trueProbabilityPath)));
             // read file3
             String line = br3.readLine();
             String[] strs = line.split(",");
@@ -309,10 +317,10 @@ public class Utils {
             // read file1
             double[] aveErrors1 = new double[TRACE_SIZE];
             line = br1.readLine();
-            int p = 0;
+            int point_index = 1;
             for (int i = 0; i < TRACE_SIZE; i++) {
-                if (p < points.length && i == points[p] && p != 0) {
-                    p++;
+                if (point_index < points.length && i == points[point_index]) {
+                    point_index++;
                 }
                 line = br1.readLine();
                 strs = line.split(",");
@@ -321,24 +329,24 @@ public class Utils {
                 for (int j = 0; j < num; j++) {
                     double value = Double.valueOf(strs[j+1]);
                     if (value != 0.5) {
-                        aveError += Math.abs(value-probabilities[j][p]);
+                        aveError += Math.abs(value-probabilities[j][point_index-1]);
                         count++;
                     }
                 }
                 if (count == 0) {
                     aveErrors1[i] = 0;
                 } else {
-                    aveErrors1[i] = aveError/num;
+                    aveErrors1[i] = aveError/count;
                 }
             }
             br1.close();
             // read file2
             double[] aveErrors2 = new double[TRACE_SIZE];
             line = br2.readLine();
-            p = 0;
+            point_index = 1;
             for (int i = GD_LEARNING_SIZE; i < TRACE_SIZE; i++) {
-                if (p < points.length && i == points[p] && p != 0) {
-                    p++;
+                if (point_index < points.length && i == points[point_index]) {
+                    point_index++;
                 }
                 line = br2.readLine();
                 strs = line.split(",");
@@ -347,20 +355,20 @@ public class Utils {
                 for (int j = 0; j < num; j++) {
                     double value = Double.valueOf(strs[j+1]);
                     if (value != 0.5) {
-                        aveError += Math.abs(value-probabilities[j][p]);
+                        aveError += Math.abs(value-probabilities[j][point_index-1]);
                         count++;
                     }
                 }
                 if (count == 0) {
                     aveErrors2[i] = 0;
                 } else {
-                    aveErrors2[i] = aveError/num;
+                    aveErrors2[i] = aveError/count;
                 }
             }
             br2.close();
             // write errorsFile
             PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(new File(errorEX3FilePath))));
-            pw.println(",SGD,GD");
+            pw.println("ActionSet,SGD,GD");
             for (int i = 0; i < GD_LEARNING_SIZE; i++) {
                 pw.println(i+","+aveErrors1[i]);
             }
@@ -373,9 +381,9 @@ public class Utils {
         }
     }
     
-    public static void outputErrorValues_EX4(File file, HybridModelUpdator HUpdator) {
+    public static void outputErrorValues_EX4(HybridModelUpdator HUpdator) {
         try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
+            BufferedReader br = new BufferedReader(new FileReader(new File(trueProbabilityPath)));
             // read true probability file
             String line = br.readLine();
             String[] strs = line.split(",");
@@ -395,10 +403,11 @@ public class Utils {
             br.close();
             // write
             PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(new File(errorEX4FilePath))));
+            pw.println("ActionSet,Hybrid");
             List<List<Double>> probabilities = HUpdator.getProbabilities();
-            int point_index = 0;
+            int point_index = 1;
             for (int i = 0; i < probabilities.size(); i++) {
-                if (i != 0 && point_index < points.length && points[point_index] == i) {
+                if (point_index < points.length && points[point_index] == i) {
                     point_index++;
                 }
                 double aveError = 0;
@@ -406,9 +415,13 @@ public class Utils {
                 for (int j = 0; j < num; j++) {
                     double value = probabilities.get(i).get(j);
                     if (value != 0.5) {
-                        aveError += Math.abs(true_probabilities[j][point_index]-value);
+                        aveError += Math.abs(true_probabilities[j][point_index-1]-value);
                         count++;
                     }
+                    /*
+                    aveError += Math.abs(true_probabilities[j][point_index]-value);
+                    count++;
+                    */
                 }
                 if (count != 0) {
                     aveError /= count;
@@ -416,6 +429,30 @@ public class Utils {
                 pw.println(i+","+aveError);
             }
             pw.close();
+        } catch (IOException e) {
+            System.err.println(e.toString());
+        }
+    }
+    
+    public static void mergeFile_EX4() {
+        try {
+            BufferedReader br1 = new BufferedReader(new FileReader(new File(errorEX3FilePath)));
+            BufferedReader br2 = new BufferedReader(new FileReader(new File(errorEX4FilePath)));
+            PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(errorEX3EX4FilePath)));
+            String line1, line2;
+            while(((line1 = br1.readLine()) != null) && ((line2 = br2.readLine()) != null)) {
+                String[] strs1 = line1.split(",");
+                String[] strs2 = line2.split(",");
+                if (strs1.length == 2) {
+                    pw.println(strs1[0]+","+strs1[1]+",,"+strs2[1]);
+                } else if (strs1.length == 3) {
+                    pw.println(strs1[0]+","+strs1[1]+","+strs1[2]+","+strs2[1]);
+                }
+            }
+            br1.close();
+            br2.close();
+            pw.close();
+            System.out.println((new File(errorEX3EX4FilePath)).getName()+" is merged.");
         } catch (IOException e) {
             System.err.println(e.toString());
         }
