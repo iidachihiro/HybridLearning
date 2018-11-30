@@ -12,13 +12,13 @@
 [TraceGenrator](https://github.com/iidachihiro/TraceGenerator)で要求される形式に依存
 - `True_Probability_TIRE5_C_v5.csv` <br>
 下図の環境を表現する確率表 <br>
-上記ファイルと`BaseRules.txt`から自動生成したいが、現状手作業で作成している。
-![v5](/resources/images/Environment_v5.png)
+上記ファイルと`BaseRules.txt`から自動生成したいが、現状手作業で作成している。<br>
+<img src="/resources/images/Environment_v5.png" width="50%">
 
 ### 環境2
 - `TIRE5_C_v6_Traces.txt` <br>
-- `True_Probability_TIRE5_C_v6.csv`
-![v6](/resources/images/Environment_v6.png)
+- `True_Probability_TIRE5_C_v6.csv` <br>
+<img src="/resources/images/Environment_v6.png" width="50%">
 
 
 ## 引数
