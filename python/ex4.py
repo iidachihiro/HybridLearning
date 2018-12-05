@@ -12,6 +12,7 @@ x = df['ActionSet']
 y1 = df['SGD']
 y2 = df['GD']
 y3 = df['Hybrid']
+
 plt.figure(figsize=(15, 10), dpi=100)
 plt.plot(x, y1, label="SGD", marker="o", markersize=1)
 plt.plot(x, y2, label="GD")
@@ -19,4 +20,5 @@ plt.plot(x, y3, label="Hybrid")
 plt.legend()
 plt.xticks(np.arange(0, 7500, 500))
 plt.yticks(np.arange(0.0, 0.5, 0.05))
+plt.hlines(np.arange(0.0, 0.5, 0.05), 0, 7500, linestyle='dashed')
 plt.savefig("ex4.png")

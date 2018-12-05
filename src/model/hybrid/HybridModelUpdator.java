@@ -50,6 +50,7 @@ public class HybridModelUpdator {
                 // GD learning
                 List<ActionSet> targetTraces = getLearningTargetTraces(i);
                 rules = GradientDescent.getUpdatedRules(rules, targetTraces);
+                System.out.println("GD is executed!!!     "+i);
                 probabilities.add(getValuesOfPostConditions());
                 i++;
                 

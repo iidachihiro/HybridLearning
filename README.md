@@ -20,6 +20,10 @@
 - `True_Probability_TIRE5_C_v6.csv` <br>
 <img src="/resources/images/Environment_v6.png" width="50%">
 
+### 環境3
+- `TIRE5_C_v7_Traces.txt` <br>
+- `True_Probability_TIRE5_C_v7.csv` <br>
+<img src="/resources/images/Environment_v7.png" width="50%">
 
 ## 引数
 - gd: 勾配効果法
