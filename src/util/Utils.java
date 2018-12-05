@@ -457,4 +457,74 @@ public class Utils {
             System.err.println(e.toString());
         }
     }
+    
+    public static void setConfigFileToDefault() {
+        String tmpFileName = "tmp.config";
+        double DEFAULT_LEARNING_RATE = 0.1;
+        double DEFAULT_THRESHOLD = 0.3;
+        File beforeConfig = new File(configPath);
+        File afterConfig = new File(resourcesPath+tmpFileName);
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(beforeConfig));
+            PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(afterConfig)));
+            String line;
+            while((line = br.readLine()) != null) {
+                if (line.startsWith("Learning Rate = ")) {
+                    pw.println("Learning Rate = "+DEFAULT_LEARNING_RATE);
+                } else if (line.startsWith("Threshold = ")) {
+                    pw.println("Threshold = "+DEFAULT_THRESHOLD);
+                } else {
+                    pw.println(line);
+                }
+            }
+            br.close();
+            pw.close();
+            if (!beforeConfig.delete()) {
+                throw new IOException(beforeConfig.getAbsolutePath()+" can't be deleted.");
+            } else {
+                System.out.println(beforeConfig.getAbsolutePath()+" was deleted.");
+            }
+            if (!afterConfig.renameTo(beforeConfig)) {
+                throw new IOException(afterConfig.getAbsolutePath()+" can't be renamed to "+beforeConfig.getAbsolutePath());
+            } else {
+                System.out.println(afterConfig.getAbsolutePath()+" was renamed to "+beforeConfig.getAbsolutePath());
+            }
+            System.out.println("setConfigFileToDefault() was successfully completed.");
+        } catch (IOException e) {
+            System.err.println(e.toString());
+        }
+    }
+    
+    public static void setLearningRateToConfig(double rate) {
+        String tmpFileName = "tmp.config";
+        File beforeConfig = new File(configPath);
+        File afterConfig = new File(resourcesPath+tmpFileName);
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(beforeConfig));
+            PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(afterConfig)));
+            String line;
+            while((line = br.readLine()) != null) {
+                if (line.startsWith("Learning Rate = ")) {
+                    pw.println("Learning Rate = "+rate);
+                } else {
+                    pw.println(line);
+                }
+            }
+            br.close();
+            pw.close();
+            if (!beforeConfig.delete()) {
+                throw new IOException(beforeConfig.getAbsolutePath()+" can't be deleted.");
+            } else {
+                System.out.println(beforeConfig.getAbsolutePath()+" was deleted.");
+            }
+            if (!afterConfig.renameTo(beforeConfig)) {
+                throw new IOException(afterConfig.getAbsolutePath()+" can't be renamed to "+beforeConfig.getAbsolutePath());
+            } else {
+                System.out.println(afterConfig.getAbsolutePath()+" was renamed to "+beforeConfig.getAbsolutePath());
+            }
+            System.out.println("setLearningRateToConfig() was successfully completed.");
+        } catch (IOException e) {
+            System.err.println(e.toString());
+        }
+    }
 }
