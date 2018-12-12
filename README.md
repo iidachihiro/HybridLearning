@@ -58,6 +58,13 @@ HybrindLearningの実験。環境変化ポイントが分かっている前提�
 出力は誤差平均値。point1, point2, ...には、真の確率ファイルで設定した環境が変化するポイントのアクションセットを書く。 <br>
 事前に実験3で生成したファイルとマージするので、まず実験3をやっておく必要がある。
 
+## Experiment4-2
+Experiment4を、GD, SGDそれぞれ学習率∈{0.001, 0.05, 0.01, 0.05, 0.1, 0.5}に変えて同じ作業を行う。
+作業後の`resources/learning.config`の学習率は、0.1に戻るようになっている。 <br>
+比較しているGD, SGDの学習率はExperiment3に準ずる(デフォルトは0.1)。
+
+`$ java -cp bin Main experiment4-2 0 point1 point2 ...`
+
 ## pythonディレクトリ
 `python ex4.py` <br>
 実験4で生成した`../ouput/ErrorValues.csv`からグラフを生成する。

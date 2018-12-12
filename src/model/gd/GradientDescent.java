@@ -9,9 +9,10 @@ import util.GDUtils;
 
 public class GradientDescent {
     static double total;
-    static double LEARNING_RATE = GDUtils.getLearningRate();
+    static double LEARNING_RATE;
     
     public static List<Rule> getUpdatedRules(List<Rule> rules, List<ActionSet> observedData) {
+        LEARNING_RATE = GDUtils.getLearningRate();
         for (Rule rule : rules) {
             total = 1;
             String preCondName = rule.getPreConditionName();

@@ -16,6 +16,7 @@ import model.generator.DomainModelGenerator;
 import model.sgd.StochasticGradientDescent;
 import util.GDUtils;
 import util.SGDUtils;
+import util.Utils;
 
 public class EnvironmentChangeDetector {
     private List<ActionSet> traces;
@@ -33,9 +34,9 @@ public class EnvironmentChangeDetector {
     
     public EnvironmentChangeDetector(List<Rule> rules) {
         this.rules_SGD = new ArrayList<>();
-        rules_SGD = copyRules(rules);
+        rules_SGD = Utils.copyRules(rules);
         this.rules_GD = new ArrayList<>();
-        rules_GD = copyRules(rules);
+        rules_GD = Utils.copyRules(rules);
         new SGDUtils();
         SGDUtils.reflesh();
         SGD_THRESHOLD = SGDUtils.getThreshold();
@@ -445,15 +446,6 @@ public class EnvironmentChangeDetector {
             }
         }
         return -1;
-    }
-    
-    private List<Rule> copyRules(List<Rule> rules) {
-        List<Rule> result = new ArrayList<>();
-        for (Rule rule : rules) {
-            Rule newRule = rule.clone();
-            result.add(newRule);
-        }
-        return result;
     }
     
     private double[] replaceArray(double[] array, double value) {

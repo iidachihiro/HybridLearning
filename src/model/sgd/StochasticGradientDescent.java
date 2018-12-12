@@ -7,9 +7,10 @@ import util.SGDUtils;
 public class StochasticGradientDescent {
     static double total;
     static double pb;
-    static double LEARNING_RATE = SGDUtils.getLearningRate();
+    static double LEARNING_RATE;
     
     public static Rule getUpdatedRule(Rule rule, String observedPostCondition) {
+        LEARNING_RATE = SGDUtils.getLearningRate();
         total = rule.getTotalOfPostConditionValues();
         pb = rule.getProbabilityOfTargetPostCondition(observedPostCondition);
         for (Condition post : rule.getPostConditions()) {

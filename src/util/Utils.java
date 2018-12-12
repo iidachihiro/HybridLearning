@@ -434,6 +434,67 @@ public class Utils {
         }
     }
     
+    public static void outputErrorValues_EX4_2(double[] rates, HybridModelUpdator[] HUpdators) {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(new File(trueProbabilityPath)));
+            // read true probability file
+            String line = br.readLine();
+            String[] strs = line.split(",");
+            int num = Integer.valueOf(strs[0]);
+            int[] points = new int[strs.length-1];
+            for (int i = 1; i < strs.length; i++) {
+                points[i-1] = Integer.valueOf(strs[i]);
+            }
+            double[][] true_probabilities = new double[num][points.length];
+            for (int i = 0; i < num; i++) {
+                line = br.readLine();
+                strs = line.split(",");
+                for (int j = 0; j < points.length; j++) {
+                    true_probabilities[i][j] = Double.valueOf(strs[j+1]);
+                }
+            }
+            br.close();
+            // write
+            PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(new File(errorEX4FilePath))));
+            pw.print("ActionSet");
+            for (double rate : rates) {
+                pw.print(",Hybrid("+rate+")");
+            }
+            pw.println();
+            List<List<List<Double>>> probabilities_all = new ArrayList<>();
+            for (HybridModelUpdator HUpdator : HUpdators) {
+                List<List<Double>> probabilities = HUpdator.getProbabilities();
+                probabilities_all.add(probabilities);
+            }
+            int point_index = 1;
+            for (int i = 0; i < probabilities_all.get(0).size(); i++) {
+                if (point_index < points.length && points[point_index] == i) {
+                    point_index++;
+                }
+                pw.print(i);
+                for (int index = 0; index < HUpdators.length; index++) {
+                    double aveError = 0;
+                    int count = 0;
+                    for (int j = 0; j < num; j++) {
+                        double value = probabilities_all.get(index).get(i).get(j);
+                        if (value != 0.5) {
+                            aveError += Math.abs(true_probabilities[j][point_index-1]-value);
+                            count++;
+                        }
+                    }
+                    if (count != 0) {
+                        aveError /= count;
+                    }
+                    pw.print(","+aveError);
+                }
+                pw.println();
+            }
+            pw.close();
+        } catch (IOException e) {
+            System.err.println(e.toString());
+        }
+    }
+    
     public static void mergeFile_EX4() {
         try {
             BufferedReader br1 = new BufferedReader(new FileReader(new File(errorEX3FilePath)));
@@ -444,10 +505,14 @@ public class Utils {
                 String[] strs1 = line1.split(",");
                 String[] strs2 = line2.split(",");
                 if (strs1.length == 2) {
-                    pw.println(strs1[0]+","+strs1[1]+",,"+strs2[1]);
+                    pw.print(strs1[0]+","+strs1[1]+",");
                 } else if (strs1.length == 3) {
-                    pw.println(strs1[0]+","+strs1[1]+","+strs1[2]+","+strs2[1]);
+                    pw.print(strs1[0]+","+strs1[1]+","+strs1[2]);
                 }
+                for (int i = 1; i < strs2.length; i++) {
+                    pw.print(","+strs2[i]);
+                }
+                pw.println();
             }
             br1.close();
             br2.close();
@@ -526,5 +591,14 @@ public class Utils {
         } catch (IOException e) {
             System.err.println(e.toString());
         }
+    }
+    
+    public static List<Rule> copyRules(List<Rule> rules) {
+        List<Rule> result = new ArrayList<>();
+        for (Rule rule : rules) {
+            Rule newRule = rule.clone();
+            result.add(newRule);
+        }
+        return result;
     }
 }
