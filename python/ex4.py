@@ -14,7 +14,7 @@ y2 = df['GD']
 y3 = df['Hybrid']
 
 plt.figure(figsize=(15, 10), dpi=100)
-plt.plot(x, y1, label="SGD", marker="o", markersize=1)
+plt.plot(x, y1, label="SGD")
 plt.plot(x, y2, label="GD")
 plt.plot(x, y3, label="Hybrid")
 plt.legend()

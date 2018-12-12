@@ -48,13 +48,25 @@ public class HybridModelUpdator {
                 shift_point = detectedPoints[point_index]+LEARNING_SIZE;
                 point_index++;
             }
+            /*
             if (shift_point == i) {
+                i++;
                 // GD learning
                 List<ActionSet> targetTraces = getLearningTargetTraces(i);
                 rules = GradientDescent.getUpdatedRules(rules, targetTraces);
                 System.out.println("GD is executed!!!     "+i);
                 probabilities.add(getValuesOfPostConditions());
-                i++;
+            }
+            */
+            if (shift_point == i) {
+                // GD learning
+                for (int j = 0; j < 1; j++) {
+                    i++;
+                    List<ActionSet> targetTraces = getLearningTargetTraces(i);
+                    rules = GradientDescent.getUpdatedRules(rules, targetTraces);
+                    System.out.println("GD is executed!!!     "+i);
+                    probabilities.add(getValuesOfPostConditions());
+                }
             }
         }
     }
