@@ -393,6 +393,73 @@ public class EnvironmentChangeDetector {
         makeTMPFile(lines, "/Users/iidachihiro/workspace/HybridLearning/output/tmp_mode7.txt");
     }
     
+    public void detect8(List<ActionSet> sets) {
+        this.traces = sets;
+        int count = 1;
+        List<double[]> recent_sgds_list = new ArrayList<>();
+        int len = 0;
+        for (Rule rule : rules_SGD) {
+            len += rule.getPostConditions().size();
+        }
+        for (int i = 0; i < len; i++) {
+            recent_sgds_list.add(new double[500*2]);
+        }
+        List<String> lines = new ArrayList<>();
+        List<Double> differences = new ArrayList<>();
+        
+        for (ActionSet as : traces) {
+            int index = getIndexOfTargetRule(rules_SGD, as);
+            Rule targetRule = rules_SGD.get(index);
+            targetRule = StochasticGradientDescent.getUpdatedRule(targetRule, as.getPostMonitorableAction());
+            rules_SGD.set(index, targetRule);
+            count++;
+            int index_ = 0;
+            for (Rule rule : rules_SGD) {
+                for (Condition post : rule.getPostConditions()) {
+                    double value_SGD = post.getValue();
+                    //double value_GD = getValueOfNthPostCondition(rules_GD, index_);
+                    recent_sgds_list.set(index_, replaceArray(recent_sgds_list.get(index_), value_SGD));
+                    double averageFirstHarf = calculateAverage(recent_sgds_list.get(index_), 0, 500);
+                    double averageSecondHarf = calculateAverage(recent_sgds_list.get(index_), 500, 500*2);
+                    if (rule.getPreConditionName().equals("arrive.m") && rule.getActionName().equals("move.e")
+                            && post.getName().equals("arrive.e")) {
+                        lines.add(count+", "+averageFirstHarf+", "+averageSecondHarf);
+                        if (count <= 500*2) {
+                            differences.add(0.0);
+                        } else {
+                            differences.add(averageFirstHarf-averageSecondHarf);
+                        }
+                    }
+                    index_++;
+                 }
+            }
+            /*
+            if (count >= LEARNING_SIZE && count < traces.size()) {
+                List<ActionSet> targetTraces = getLearningTargetTraces(count);
+                this.rules_GD = GradientDescent.getUpdatedRules(rules_GD, targetTraces);
+                int index_ = 0;
+                for (Rule rule : rules_SGD) {
+                    for (Condition post : rule.getPostConditions()) {
+                        double value_SGD = post.getValue();
+                        //double value_GD = getValueOfNthPostCondition(rules_GD, index_);
+                        recent_sgds_list.set(index_, replaceArray(recent_sgds_list.get(index_), value_SGD));
+                        double averageFirstHarf = calculateAverage(recent_sgds_list.get(index_), 0, 100);
+                        double averageSecondHarf = calculateAverage(recent_sgds_list.get(index_), 100, 200);
+                        if (rule.getPreConditionName().equals("arrive.m") && rule.getActionName().equals("move.e")
+                                && post.getName().equals("arrive.e")) {
+                            lines.add(count+", "+averageFirstHarf+", "+averageSecondHarf);
+                            differences.add(averageFirstHarf-averageSecondHarf);
+                        }
+                        index_++;
+                     }
+                }
+            }
+            */
+        }
+        makeTMPFile(lines, "/Users/iidachihiro/workspace/HybridLearning/output/tmp_mode8.txt");
+        makeTMPDifferenceFile_mode8(differences, "/Users/iidachihiro/workspace/HybridLearning/output/diff_mode8.csv");
+    }
+    
     private int getIndexOfTargetRule(List<Rule> rules, ActionSet as) {
         for (int i = 0; i < rules.size(); i++) {
             Rule rule = rules.get(i);
@@ -539,4 +606,27 @@ public class EnvironmentChangeDetector {
         if (a >= b) return a/b;
         else return b/a;
     } 
+    
+    private double calculateAverage(double[] array, int start, int end) {
+        double result = 0;
+        for (int i = start; i < end && i < array.length; i++) {
+            result += array[i];
+        }
+        return result/(end-start);
+    }
+    
+    private void makeTMPDifferenceFile_mode8(List<Double> list, String path) {
+        File file = new File(path);
+        try {
+            PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+            pw.println("ActionSet,Difference");
+            for (int i = 0; i < list.size(); i++) {
+                pw.println(i+","+list.get(i));
+            }
+            pw.close();
+        } catch (IOException e) {
+            System.err.println(e.toString());
+        }
+        System.out.println("Created "+file.getName()+"!!");
+    }
 }
