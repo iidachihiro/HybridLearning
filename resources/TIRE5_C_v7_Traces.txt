@@ -1,4 +1,3 @@
-start
 arrive.w
 move.e
 arrive.m
@@ -14999,3 +14998,4 @@ arrive.m
 move.w
 arrive.w
 putdown
+putsuccess

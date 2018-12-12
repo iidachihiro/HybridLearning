@@ -9,6 +9,7 @@ import core.Rule;
 import model.gd.GradientDescent;
 import model.sgd.StochasticGradientDescent;
 import util.GDUtils;
+import util.SGDUtils;
 
 public class HybridModelUpdator {
     private List<Rule> rules;
@@ -21,6 +22,7 @@ public class HybridModelUpdator {
     public HybridModelUpdator(List<Rule> _rules) {
         this.rules = _rules;
         new GDUtils();
+        new SGDUtils();
         LEARNING_SIZE = GDUtils.getLearningSize();
     }
     
@@ -46,14 +48,25 @@ public class HybridModelUpdator {
                 shift_point = detectedPoints[point_index]+LEARNING_SIZE;
                 point_index++;
             }
+            /*
             if (shift_point == i) {
+                i++;
                 // GD learning
                 List<ActionSet> targetTraces = getLearningTargetTraces(i);
                 rules = GradientDescent.getUpdatedRules(rules, targetTraces);
                 System.out.println("GD is executed!!!     "+i);
                 probabilities.add(getValuesOfPostConditions());
-                i++;
-                
+            }
+            */
+            if (shift_point == i) {
+                // GD learning
+                for (int j = 0; j < 1; j++) {
+                    i++;
+                    List<ActionSet> targetTraces = getLearningTargetTraces(i);
+                    rules = GradientDescent.getUpdatedRules(rules, targetTraces);
+                    System.out.println("GD is executed!!!     "+i);
+                    probabilities.add(getValuesOfPostConditions());
+                }
             }
         }
     }

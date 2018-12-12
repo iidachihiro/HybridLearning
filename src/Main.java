@@ -73,6 +73,25 @@ public class Main {
             Utils.outputErrorValues_EX4(HUpdator);
             Utils.mergeFile_EX4();
             System.out.println("experiment4 finished.");
+        } else if (args[0].equals("experiment4-2")) {
+            double[] rates = {0.001, 0.005, 0.01, 0.05, 0.1, 0.5};
+            HybridModelUpdator[] HUpdators = new HybridModelUpdator[rates.length];
+            int[] detectedPoints = new int[args.length-1];
+            for (int i = 0; i < detectedPoints.length; i++) {
+                detectedPoints[i] = Integer.valueOf(args[i+1]);
+            }
+            for (int i = 0; i < rates.length; i++) {
+                double rate = rates[i];
+                Utils.setLearningRateToConfig(rate);
+                List<Rule> tmp_rules = Utils.copyRules(rules);
+                HybridModelUpdator HUpdator = new HybridModelUpdator(tmp_rules);
+                HUpdator.learn1(sets, detectedPoints);
+                HUpdators[i] = HUpdator;
+            }
+            Utils.outputErrorValues_EX4_2(rates, HUpdators);
+            Utils.mergeFile_EX4();
+            Utils.setConfigFileToDefault();
+            System.out.println("experiment4-2 finished.");
         }
     }
 }
