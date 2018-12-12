@@ -2,10 +2,14 @@ import pandas as pd
 import pylab
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
 
 output_path = "../output/"
 file_name = "ErrorValues.csv"
 file_path = output_path+file_name
+
+args = sys.argv
+max = int(args[1])
 
 df = pd.read_csv(file_path)
 x = df['ActionSet']
@@ -28,9 +32,9 @@ plt.plot(x, y6, label="Hybrid(0.05)")
 plt.plot(x, y7, label="Hybrid(0.1)")
 plt.plot(x, y8, label="Hybrid(0.5)")
 plt.legend()
-plt.xticks(np.arange(0, 7500, 500))
+plt.xticks(np.arange(0, max, 500))
 plt.yticks(np.arange(0.0, 0.5, 0.05))
-plt.hlines(np.arange(0.0, 0.5, 0.05), 0, 7500, linestyle='dashed')
+plt.hlines(np.arange(0.0, 0.5, 0.05), 0, max, linestyle='dashed')
 plt.savefig("ex4.png")
 
 print("ex4.png is output!!")

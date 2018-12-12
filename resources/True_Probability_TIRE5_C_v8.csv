@@ -1,0 +1,27 @@
+26,0,2500,5000,7500
+arrive.w move.e arrive.m,1,1,1,1
+arrive.w moce.e arrive.e,0,0,0,0
+arrive.w move.e arrive.w,0,0,0,0
+arrive.m move.e arrive.e,1,0.7,0.4,1
+arrive.m move.e arrive.m,0,0.3,0.6,0
+arrive.m move.e arrive.w,0,0,0,0
+arrive.e pickup pickupfail,0,0,0,0
+arrive.e pickup pickupsuccess,1,1,1,1
+pickupfail pickup pickupsuccess,1,1,1,1
+pickupfail pickup pickupfail,0,0,0,0
+pickupsuccess move.w arrive.w,0,0,0,0
+pickupsuccess move.w arrive.m,1,1,1,1
+pickupsuccess move.w arrive.e,0,0,0,0
+arrive.w putdown putfail,0,0,0,0
+arrive.w putdown putsuccess,1,1,1,1
+putfail putdown putsuccess,1,1,1,1
+putfail putdown putfail,0,0,0,0
+putsuccess move.e arrive.w,0,0,0,0
+putsuccess move.e arrive.m,1,1,1,1
+putsuccess move.e arrive.e,0,0,0,0
+arrive.m move.w arrive.w,1,1,1,1
+arrive.m move.w arrive.m,0,0,0,0
+arrive.m move.w arrive.e,0,0,0,0
+arrive.e move.w arrive.e,0,0,0,0
+arrive.e move.w arrive.m,1,1,1,1
+arrive.e move.w arrive.w,0,0,0,0
