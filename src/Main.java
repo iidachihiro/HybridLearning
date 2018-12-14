@@ -93,6 +93,7 @@ public class Main {
     }
     
     private static void doExperiment4(List<Rule> rules, List<ActionSet> sets, String[] args) {
+        doExperiment3(rules, sets);
         HybridModelUpdator HUpdator = new HybridModelUpdator(rules);
         int[] detectedPoints = new int[args.length-1];
         for (int i = 0; i < detectedPoints.length; i++) {
