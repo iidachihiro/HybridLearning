@@ -394,6 +394,7 @@ public class EnvironmentChangeDetector {
     }
     
     public void detect8(List<ActionSet> sets) {
+        int WINDOW = 1000;
         this.traces = sets;
         int count = 1;
         List<double[]> recent_sgds_list = new ArrayList<>();
@@ -402,7 +403,7 @@ public class EnvironmentChangeDetector {
             len += rule.getPostConditions().size();
         }
         for (int i = 0; i < len; i++) {
-            recent_sgds_list.add(new double[500*2]);
+            recent_sgds_list.add(new double[WINDOW*2]);
         }
         List<String> lines = new ArrayList<>();
         List<Double> differences = new ArrayList<>();
@@ -419,12 +420,12 @@ public class EnvironmentChangeDetector {
                     double value_SGD = post.getValue();
                     //double value_GD = getValueOfNthPostCondition(rules_GD, index_);
                     recent_sgds_list.set(index_, replaceArray(recent_sgds_list.get(index_), value_SGD));
-                    double averageFirstHarf = calculateAverage(recent_sgds_list.get(index_), 0, 500);
-                    double averageSecondHarf = calculateAverage(recent_sgds_list.get(index_), 500, 500*2);
+                    double averageFirstHarf = calculateAverage(recent_sgds_list.get(index_), 0, WINDOW);
+                    double averageSecondHarf = calculateAverage(recent_sgds_list.get(index_), WINDOW, WINDOW*2);
                     if (rule.getPreConditionName().equals("arrive.m") && rule.getActionName().equals("move.e")
                             && post.getName().equals("arrive.e")) {
                         lines.add(count+", "+averageFirstHarf+", "+averageSecondHarf);
-                        if (count <= 500*2) {
+                        if (count <= WINDOW*2) {
                             differences.add(0.0);
                         } else {
                             differences.add(averageFirstHarf-averageSecondHarf);

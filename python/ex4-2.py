@@ -23,8 +23,8 @@ y7 = df['Hybrid(0.1)']
 y8 = df['Hybrid(0.5)']
 
 plt.figure(figsize=(15, 10), dpi=100)
-plt.plot(x, y1, label="SGD")
-plt.plot(x, y2, label="GD")
+plt.plot(x, y1, label="SGD(0.1)")
+plt.plot(x, y2, label="GD(0.1)")
 plt.plot(x, y3, label="Hybrid(0.001)")
 plt.plot(x, y4, label="Hybrid(0.005)")
 plt.plot(x, y5, label="Hybrid(0.01)")

@@ -60,7 +60,8 @@ public class HybridModelUpdator {
             */
             if (shift_point == i) {
                 // GD learning
-                for (int j = 0; j < 1; j++) {
+                int NUMBER_OF_GD_LEARNING = 100;
+                for (int j = 0; j < NUMBER_OF_GD_LEARNING; j++) {
                     i++;
                     List<ActionSet> targetTraces = getLearningTargetTraces(i);
                     rules = GradientDescent.getUpdatedRules(rules, targetTraces);
