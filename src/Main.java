@@ -35,6 +35,8 @@ public class Main {
             doExperiment4_2(rules, sets, args);
         } else if (args[0].equals("experiment4-3")) {
             doExperiment4_3(rules, sets, args);
+        } else if (args[0].equals("experiment5")) {
+            doExperiment5(rules, sets);
         }
     }
     
@@ -145,5 +147,18 @@ public class Main {
         GDUpdator.learn(sets,  "experiment1");
         Utils.outputErrorValues_EX4_3(HUpdator, SGDUpdator, GDUpdator);
         System.out.println("experiment4-3 finished.");
+    }
+    
+    private static void doExperiment5(List<Rule> rules, List<ActionSet> sets) {
+        SGDModelUpdator SGDUpdator = new SGDModelUpdator(rules);
+        SGDUpdator.learn(sets,  "experiment1");
+        rules = Utils.readBaseRules();
+        GDModelUpdator GDUpdator = new GDModelUpdator(rules);
+        GDUpdator.learn(sets,  "experiment1");
+        rules = Utils.readBaseRules();
+        HybridModelUpdator HUpdator = new HybridModelUpdator(rules);
+        HUpdator.learn2(sets);
+        Utils.outputErrorValues_EX5(HUpdator, SGDUpdator, GDUpdator);
+        System.out.println("experiment5 finished.");
     }
 }

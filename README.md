@@ -76,6 +76,12 @@ Experiment4を、GD, SGDそれぞれ学習率∈{0.001, 0.05, 0.01, 0.05, 0.1, 0
 Experiment4を、各ルールについて誤差を出力する。
 ファイルは各ルール毎に出力する。
 
+## Experiment5
+HybridLearningの実験。環境変化ポイントの特定は慎重にやる必要がある。 <br>
+要調整(12/17段階) <br>
+`$ java -cp bin Main experiment5` <br>
+`output/ex5/`ディレクトリに各ルールの事後条件の尤度推移(`ValuesEX5.csv`)と事後条件の尤度と真の確率の誤差(`*.csv`)を出力する。
+
 ## pythonディレクトリ
 `python ex4.py` <br>
 実験4で生成した`../ouput/ErrorValues.csv`からグラフを生成する。

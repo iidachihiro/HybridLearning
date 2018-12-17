@@ -669,4 +669,150 @@ public class Utils {
             System.err.println(e.toString());
         }
     }
+    
+    public static void outputErrorValues_EX5(HybridModelUpdator HUpdator, SGDModelUpdator SGDUpdator, GDModelUpdator GDUpdator) {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(new File(trueProbabilityPath)));
+            // read true probability file
+            String line = br.readLine();
+            String[] strs = line.split(",");
+            int num = Integer.valueOf(strs[0]);
+            int[] points = new int[strs.length-1];
+            for (int i = 1; i < strs.length; i++) {
+                points[i-1] = Integer.valueOf(strs[i]);
+            }
+            double[][] true_probabilities = new double[num][points.length];
+            for (int i = 0; i < num; i++) {
+                line = br.readLine();
+                strs = line.split(",");
+                for (int j = 0; j < points.length; j++) {
+                    true_probabilities[i][j] = Double.valueOf(strs[j+1]);
+                }
+            }
+            br.close();
+            // write
+            File ex5Dir = new File(outputPath+"ex5/");
+            if (!ex5Dir.exists()) {
+                ex5Dir.mkdirs();
+            }
+            File errorDir = new File(ex5Dir.getAbsolutePath()+"/error/");
+            if (!errorDir.exists()) {
+                errorDir.mkdirs();
+            }
+            File valueDir = new File(ex5Dir.getAbsolutePath()+"/value/");
+            if (!valueDir.exists()) {
+                valueDir.mkdirs();
+            }
+            
+            int GD_LEARNING_SIZE = GDUtils.getLearningSize();
+            List<List<Double>> HProbabilities = HUpdator.getProbabilities();
+            List<List<Double>> SGDProbabilities = SGDUpdator.getProbabilities();
+            List<List<Double>> GDProbabilities = GDUpdator.getProbabilities();
+            if (HProbabilities.size() != SGDProbabilities.size() || HProbabilities.size() != GDProbabilities.size()+GD_LEARNING_SIZE) {
+                System.out.println("size is different!!!!!!");
+            }
+            int index = 0;
+            int size = HProbabilities.size();
+            for (Rule rule : HUpdator.getRules()) {
+                String preCondName = rule.getPreConditionName();
+                String actName = rule.getActionName();
+                for (Condition post : rule.getPostConditions()) {
+                    String postCondName = post.getName();
+                    String path = errorDir.getAbsolutePath()+"/"+preCondName+"_"+actName+"_"+postCondName+".csv";
+                    PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(new File(path))));
+                    pw.println("ActionSet,SGD,GD,Hybrid");
+                    int point_index = 1;
+                    for (int i = 1; i < size; i++) {
+                        if (point_index < points.length && points[point_index] == i) {
+                            point_index++;
+                        }
+                        double HError = Math.abs(HProbabilities.get(i).get(index)-true_probabilities[index][point_index-1]);
+                        double SGDError = Math.abs(SGDProbabilities.get(i).get(index)-true_probabilities[index][point_index-1]);
+                        if (i < GD_LEARNING_SIZE) {
+                            pw.println(i+","+SGDError+",,"+HError);
+                        } else {
+                            double GDError = Math.abs(GDProbabilities.get(i-GD_LEARNING_SIZE).get(index)-true_probabilities[index][point_index-1]);
+                            pw.println(i+","+SGDError+","+GDError+","+HError);
+                        }
+                    }
+                    pw.close();
+                    index++;
+                }
+            }
+            index = 0;
+            for (Rule rule : HUpdator.getRules()) {
+                String preCondName = rule.getPreConditionName();
+                String actName = rule.getActionName();
+                for (Condition post : rule.getPostConditions()) {
+                    String postCondName = post.getName();
+                    String path = valueDir.getAbsolutePath()+"/"+preCondName+"_"+actName+"_"+postCondName+".csv";
+                    PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(new File(path))));
+                    pw.println("ActionSet,SGD,GD,Hybrid");
+                    int point_index = 1;
+                    for (int i = 1; i < size; i++) {
+                        if (point_index < points.length && points[point_index] == i) {
+                            point_index++;
+                        }
+                        double HValue = HProbabilities.get(i).get(index);
+                        double SGDValue = SGDProbabilities.get(i).get(index);
+                        if (i < GD_LEARNING_SIZE) {
+                            pw.println(i+","+SGDValue+",,"+HValue);
+                        } else {
+                            double GDValue = GDProbabilities.get(i-GD_LEARNING_SIZE).get(index);
+                            pw.println(i+","+SGDValue+","+GDValue+","+HValue);
+                        }
+                    }
+                    pw.close();
+                    index++;
+                }
+            }
+            
+            String valuesForEX5Path = outputPath+ex5Dir.getName()+"/valuesEX5.csv";
+            PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(new File(valuesForEX5Path))));
+            pw.print("ActionSet");
+            for (Rule rule : HUpdator.getRules()) {
+                String preCondName = rule.getPreConditionName();
+                String actName = rule.getActionName();
+                for (Condition post : rule.getPostConditions()) {
+                    String postCondName = post.getName();
+                    String name = preCondName+"_"+actName+"_"+postCondName;
+                    pw.print(","+name);
+                }
+            }
+            pw.println();
+            int i = 0;
+            for (List<Double> tmp : HUpdator.getTmpProbabilities()) {
+                pw.print(i++);
+                for (double t : tmp) {
+                    pw.print(","+t);
+                }
+                pw.println();
+            }
+            pw.close();
+        } catch (IOException e) {
+            System.err.println(e.toString());
+        }
+    }
+    
+    public static double calculateVariance(double... values) {
+        double average = 0;
+        double squareAverage = 0;
+        for (double value : values) {
+            average += value;
+            squareAverage += value*value;
+        }
+        average /= values.length;
+        squareAverage /= values.length;
+        return squareAverage - average*average;
+    }
+    
+    public static List<Double> getValuesOfPostConditions(List<Rule> rules) {
+        List<Double> values = new ArrayList<>();
+        for (Rule rule : rules) {
+            for (Condition post : rule.getPostConditions()) {
+                values.add(post.getValue());
+            }
+        }
+        return values;
+    }
 }
