@@ -17,6 +17,8 @@ public class GDModelUpdator {
     
     private int domainModelUpdatedCount = 0;
     
+    private List<List<Double>> probabilities;
+    
     public GDModelUpdator(List<Rule> _rules) {
         this.rules = _rules;
         this.traces = new ArrayList<>();
@@ -28,6 +30,10 @@ public class GDModelUpdator {
     
     public int getLearningSize() {
         return LEARNING_SIZE;
+    }
+    
+    public List<List<Double>> getProbabilities() {
+        return probabilities;
     }
     
     public void learn(List<ActionSet> sets) {
@@ -44,6 +50,8 @@ public class GDModelUpdator {
     }
     
     public void learn(List<ActionSet> sets, String exMode) {
+        probabilities = new ArrayList<>();
+        probabilities.add(getValuesOfPostConditions());
         if (exMode.equals("experiment1")) {
             this.traces.add(null);
             this.traces.addAll(sets);
@@ -51,6 +59,7 @@ public class GDModelUpdator {
             for (int i = LEARNING_SIZE; i < traces.size(); i++) {
                 List<ActionSet> targetTraces = getLearningTargetTraces(i);
                 this.rules = GradientDescent.getUpdatedRules(rules, targetTraces);
+                probabilities.add(getValuesOfPostConditions());
                 if (isNecessaryOfUpdatingEnvironmentModel()) {
                     DomainModelGenerator generator = new DomainModelGenerator();
                     generator.generate(rules, THRESHOLD, i, "GD");
@@ -85,5 +94,15 @@ public class GDModelUpdator {
     
     public void printDomainModelUpdatedCount() {
         System.out.println("The number of updating domain model is "+this.domainModelUpdatedCount+".");
+    }
+    
+    public List<Double> getValuesOfPostConditions() {
+        List<Double> values = new ArrayList<>();
+        for (Rule rule : rules) {
+            for (Condition post : rule.getPostConditions()) {
+                values.add(post.getValue());
+            }
+        }
+        return values;
     }
 }

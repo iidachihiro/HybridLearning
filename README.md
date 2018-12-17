@@ -72,6 +72,10 @@ Experiment4を、GD, SGDそれぞれ学習率∈{0.001, 0.05, 0.01, 0.05, 0.1, 0
 
 `$ java -cp bin Main experiment4-2 0 point1 point2 ...`
 
+## Experiment4-3
+Experiment4を、各ルールについて誤差を出力する。
+ファイルは各ルール毎に出力する。
+
 ## pythonディレクトリ
 `python ex4.py` <br>
 実験4で生成した`../ouput/ErrorValues.csv`からグラフを生成する。
