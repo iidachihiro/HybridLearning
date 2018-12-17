@@ -30,6 +30,10 @@ public class HybridModelUpdator {
         return this.probabilities;
     }
     
+    public List<Rule> getRules() {
+        return this.rules;
+    }
+    
     // for experiment4
     public void learn1(List<ActionSet> sets, int[] detectedPoints) {
         this.traces = sets;

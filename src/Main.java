@@ -33,6 +33,8 @@ public class Main {
             doExperiment4(rules, sets, args);
         } else if (args[0].equals("experiment4-2")) {
             doExperiment4_2(rules, sets, args);
+        } else if (args[0].equals("experiment4-3")) {
+            doExperiment4_3(rules, sets, args);
         }
     }
     
@@ -125,5 +127,22 @@ public class Main {
         Utils.mergeFile_EX4();
         Utils.setConfigFileToDefault();
         System.out.println("experiment4-2 finished.");
+    }
+    
+    private static void doExperiment4_3(List<Rule> rules, List<ActionSet> sets, String[] args) {
+        int[] detectedPoints = new int[args.length-1];
+        for (int i = 0; i < detectedPoints.length; i++) {
+            detectedPoints[i] = Integer.valueOf(args[i+1]);
+        }
+        HybridModelUpdator HUpdator = new HybridModelUpdator(rules);
+        HUpdator.learn1(sets, detectedPoints);
+        rules = Utils.readBaseRules();
+        SGDModelUpdator SGDUpdator = new SGDModelUpdator(rules);
+        SGDUpdator.learn(sets,  "experiment1");
+        rules = Utils.readBaseRules();
+        GDModelUpdator GDUpdator = new GDModelUpdator(rules);
+        GDUpdator.learn(sets,  "experiment1");
+        Utils.outputErrorValues_EX4_3(HUpdator, SGDUpdator, GDUpdator);
+        System.out.println("experiment4-3 finished.");
     }
 }

@@ -1,5 +1,6 @@
 package model.sgd;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import core.ActionSet;
@@ -14,11 +15,17 @@ public class SGDModelUpdator {
     
     private int domainModelUpdatedCount = 0;
     
+    private List<List<Double>> probabilities;
+    
     public SGDModelUpdator(List<Rule> _rules) {
         rules = _rules;
         new SGDUtils();
         SGDUtils.reflesh();
         THRESHOLD = SGDUtils.getThreshold();
+    }
+    
+    public List<List<Double>> getProbabilities() {
+        return probabilities;
     }
     
     public void learn(List<ActionSet> traces) {
@@ -38,6 +45,8 @@ public class SGDModelUpdator {
     }
     
     public void learn(List<ActionSet> traces, String exMode) {
+        probabilities = new ArrayList<>();
+        probabilities.add(getValuesOfPostConditions());
         if (exMode.equals("experiment1")) {
             int count = 1;
             SGDUtils.prepareValuesOfRules(rules);
@@ -45,6 +54,7 @@ public class SGDModelUpdator {
                 int index = getIndexOfTargetRule(as);
                 Rule targetRule = rules.get(index);
                 targetRule = StochasticGradientDescent.getUpdatedRule(targetRule, as.getPostMonitorableAction());
+                probabilities.add(getValuesOfPostConditions());
                 if (isNecessaryOfUpdatingEnvironmentModel(targetRule)) {
                     DomainModelGenerator generator = new DomainModelGenerator();
                     generator.generate(rules, THRESHOLD, count, "SGD");
@@ -81,5 +91,15 @@ public class SGDModelUpdator {
     
     public void printDomainModelUpdatedCount() {
         System.out.println("The number of updating domain model is "+this.domainModelUpdatedCount+".");
+    }
+    
+    public List<Double> getValuesOfPostConditions() {
+        List<Double> values = new ArrayList<>();
+        for (Rule rule : rules) {
+            for (Condition post : rule.getPostConditions()) {
+                values.add(post.getValue());
+            }
+        }
+        return values;
     }
 }

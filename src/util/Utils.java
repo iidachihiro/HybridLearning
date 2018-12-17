@@ -14,7 +14,9 @@ import java.util.List;
 import core.ActionSet;
 import core.Condition;
 import core.Rule;
+import model.gd.GDModelUpdator;
 import model.hybrid.HybridModelUpdator;
+import model.sgd.SGDModelUpdator;
 
 public class Utils {
     private static String originalPath;
@@ -370,7 +372,7 @@ public class Utils {
             PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(new File(errorEX3FilePath))));
             pw.println("ActionSet,SGD,GD");
             for (int i = 0; i < GD_LEARNING_SIZE; i++) {
-                pw.println(i+","+aveErrors1[i]);
+                pw.println(i+","+aveErrors1[i]+",");
             }
             for (int i = GD_LEARNING_SIZE; i < TRACE_SIZE; i++) {
                 pw.println(i+","+aveErrors1[i]+","+aveErrors2[i]);
@@ -600,5 +602,71 @@ public class Utils {
             result.add(newRule);
         }
         return result;
+    }
+    
+    public static void outputErrorValues_EX4_3(HybridModelUpdator HUpdator, SGDModelUpdator SGDUpdator, GDModelUpdator GDUpdator) {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(new File(trueProbabilityPath)));
+            // read true probability file
+            String line = br.readLine();
+            String[] strs = line.split(",");
+            int num = Integer.valueOf(strs[0]);
+            int[] points = new int[strs.length-1];
+            for (int i = 1; i < strs.length; i++) {
+                points[i-1] = Integer.valueOf(strs[i]);
+            }
+            double[][] true_probabilities = new double[num][points.length];
+            for (int i = 0; i < num; i++) {
+                line = br.readLine();
+                strs = line.split(",");
+                for (int j = 0; j < points.length; j++) {
+                    true_probabilities[i][j] = Double.valueOf(strs[j+1]);
+                }
+            }
+            br.close();
+            // write
+            File ex4_3Dir = new File(outputPath+"ex4-3/");
+            if (!ex4_3Dir.exists()) {
+                ex4_3Dir.mkdirs();
+            }
+            
+            int GD_LEARNING_SIZE = GDUtils.getLearningSize();
+            List<List<Double>> HProbabilities = HUpdator.getProbabilities();
+            List<List<Double>> SGDProbabilities = SGDUpdator.getProbabilities();
+            List<List<Double>> GDProbabilities = GDUpdator.getProbabilities();
+            if (HProbabilities.size() != SGDProbabilities.size() || HProbabilities.size() != GDProbabilities.size()+GD_LEARNING_SIZE) {
+                System.out.println("size is different!!!!!!");
+            }
+            int index = 0;
+            int size = HProbabilities.size();
+            for (Rule rule : HUpdator.getRules()) {
+                String preCondName = rule.getPreConditionName();
+                String actName = rule.getActionName();
+                for (Condition post : rule.getPostConditions()) {
+                    String postCondName = post.getName();
+                    String path = ex4_3Dir.getAbsolutePath()+"/"+preCondName+"_"+actName+"_"+postCondName+".csv";
+                    PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(new File(path))));
+                    pw.println("ActionSet,SGD,GD,Hybrid");
+                    int point_index = 1;
+                    for (int i = 1; i < size; i++) {
+                        if (point_index < points.length && points[point_index] == i) {
+                            point_index++;
+                        }
+                        double HError = Math.abs(HProbabilities.get(i).get(index)-true_probabilities[index][point_index-1]);
+                        double SGDError = Math.abs(SGDProbabilities.get(i).get(index)-true_probabilities[index][point_index-1]);
+                        if (i < GD_LEARNING_SIZE) {
+                            pw.println(i+","+SGDError+",,"+HError);
+                        } else {
+                            double GDError = Math.abs(GDProbabilities.get(i-GD_LEARNING_SIZE).get(index)-true_probabilities[index][point_index-1]);
+                            pw.println(i+","+SGDError+","+GDError+","+HError);
+                        }
+                    }
+                    pw.close();
+                    index++;
+                }
+            }
+        } catch (IOException e) {
+            System.err.println(e.toString());
+        }
     }
 }
