@@ -80,16 +80,27 @@ Experiment4を、各ルールについて誤差を出力する。
 HybridLearningの実験。環境変化ポイントの特定は慎重にやる必要がある。 <br>
 `HybridModelUpdator.learn2`メソッドを利用しているが、要調整(12/17段階) <br>
 `$ java -cp bin Main experiment5-1` <br>
-`output/ex5/`ディレクトリに各ルールの事後条件の尤度推移(`ValuesEX5.csv`)と事後条件の尤度と真の確率の誤差(`*.csv`)を出力する。
+`output/ex5/`ディレクトリに各ルールの事後条件の尤度推移(`ValuesEX5.csv`)と、`error`ディレクトリと`value`ディレクトリを作成する。
+  - `value`: 各ルールの事後条件の尤度を出力する(`*.csv`)
+  - `error`: 各ルールの事後条件の尤度と、真の確率の差を出力する(`*.csv`)
 
 ## Experiment5-2
 HybridLearningの実験。環境変化ポイントの特定は慎重にやる必要がある。 <br>
-`HybridModelUpdator.learn2`メソッドを利用しているが、~~要調整(12/18段階)~~ <br>
+`HybridModelUpdator.learn3`メソッドを利用しているが、~~要調整(12/18段階)~~ <br>
 現状結構良い結果が出ている。 <br>
 
 `$ java -cp bin Main experiment5-2` <br>
-`output/ex5/`ディレクトリに各ルールの事後条件の尤度推移(`ValuesEX5.csv`)と事後条件の尤度と真の確率の誤差(`*.csv`)を出力する。
+上と同じ。
 
 ## pythonディレクトリ
-`python ex4.py` <br>
+- `python ex4.py` <br>
 実験4で生成した`../ouput/ErrorValues.csv`からグラフを生成する。
+- `python ex4-2.py num` <br>
+実験4-2で生成した`../ouput/ErrorValues.csv`からグラフを生成する。`num`
+はトレースのアクションセット数
+- `python ex4-3.py num` <br>
+実験4-3用
+- `ex5.py num` <br>
+実験5で生成した`error`、`value`ディレクトリ下のファイルから、グラフを出力する。
+- `ex5_value.py num`
+実験5で生成した`ValuesEX5.csv`ファイルからグラフを出力する。
