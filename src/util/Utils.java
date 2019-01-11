@@ -815,4 +815,38 @@ public class Utils {
         }
         return values;
     }
+    
+    public static void outputResultE5(int SGD_count, int GD_count, int H_count, double SGD_time, double GD_time, double H_time) {
+        try {
+            String filePath = outputPath+"ex5/EX5Result.txt";
+            File file = new File(filePath);
+            PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+            pw.println("EX5 Result");
+            pw.println("**************************************************");
+            pw.println("configuration");
+            pw.println("SGD Learning Rate = "+SGDUtils.getLearningRate());
+            pw.println("SGD Threshold = "+SGDUtils.getThreshold());
+            pw.println("GD Learning Rate = "+GDUtils.getLearningRate());
+            pw.println("GD Threshold = "+GDUtils.getThreshold());
+            pw.println("**************************************************");
+            pw.println("SGD");
+            pw.println("updated count = "+SGD_count);
+            pw.println("time = "+nanoToSec(SGD_time)+" sec");
+            pw.println("**************************************************");
+            pw.println("GD");
+            pw.println("updated count = "+GD_count);
+            pw.println("time = "+nanoToSec(GD_time)+" sec");
+            pw.println("**************************************************");
+            pw.println("Hybrid");
+            pw.println("updated count = "+H_count);
+            pw.println("time = "+nanoToSec(H_time)+" sec");
+            pw.close();
+        } catch (IOException e) {
+            System.err.println(e.toString());
+        }
+    }
+    
+    public static double nanoToSec(double time) {
+        return time/Math.pow(10, 9);
+    }
 }

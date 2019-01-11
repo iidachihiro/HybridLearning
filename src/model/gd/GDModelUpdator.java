@@ -36,6 +36,10 @@ public class GDModelUpdator {
         return probabilities;
     }
     
+    public int getDomainModelUpdatedCount() {
+        return this.domainModelUpdatedCount;
+    }
+    
     public void learn(List<ActionSet> sets) {
         this.traces = sets;
         for (int i = LEARNING_SIZE; i < traces.size(); i++) {

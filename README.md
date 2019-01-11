@@ -84,7 +84,7 @@ HybridLearningの実験。環境変化ポイントの特定は慎重にやる必
   - `value`: 各ルールの事後条件の尤度を出力する(`*.csv`)
   - `error`: 各ルールの事後条件の尤度と、真の確率の差を出力する(`*.csv`)
 
-## Experiment5-2
+## Experiment5-2 (最終的に使ったのはこれ)
 HybridLearningの実験。環境変化ポイントの特定は慎重にやる必要がある。 <br>
 `HybridModelUpdator.learn3`メソッドを利用しているが、~~要調整(12/18段階)~~ <br>
 現状結構良い結果が出ている。 <br>

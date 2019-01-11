@@ -28,6 +28,10 @@ public class SGDModelUpdator {
         return probabilities;
     }
     
+    public int getDomainModelUpdatedCount() {
+        return this.domainModelUpdatedCount;
+    }
+    
     public void learn(List<ActionSet> traces) {
         int count = 1;
         for (ActionSet as : traces) {

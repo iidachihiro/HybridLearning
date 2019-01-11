@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import core.ActionSet;
+import core.Condition;
 import core.Rule;
 import model.gd.GradientDescent;
+import model.generator.DomainModelGenerator;
 import model.sgd.StochasticGradientDescent;
 import util.GDUtils;
 import util.SGDUtils;
@@ -20,13 +22,23 @@ public class HybridModelUpdator {
     
     private int LEARNING_SIZE;
     
+    private double SGD_THRESHOLD;
+    private double GD_THRESHOLD;
+    private int domainModelUpdatedCount = 0;
+    
     private int windowSize; //for detecting Environmental Change
+    
+    public int getDomainModelUpdatedCount() {
+        return this.domainModelUpdatedCount;
+    }
     
     public HybridModelUpdator(List<Rule> _rules) {
         this.rules = _rules;
         new GDUtils();
         new SGDUtils();
         LEARNING_SIZE = GDUtils.getLearningSize();
+        SGD_THRESHOLD = SGDUtils.getThreshold();
+        GD_THRESHOLD = GDUtils.getThreshold();
         windowSize = LEARNING_SIZE / 10;
     }
     
@@ -153,6 +165,11 @@ public class HybridModelUpdator {
                     }
                     List<ActionSet> targetTraces = getTargetActionSet(changePoint, i);
                     rules = GradientDescent.getUpdatedRules(rules, targetTraces);
+                    if (isNecessaryOfUpdatingEnvironmentModel_GD()) {
+                        DomainModelGenerator generator = new DomainModelGenerator();
+                        generator.generate(rules, GD_THRESHOLD, i, "GD");
+                        this.domainModelUpdatedCount++;
+                    }
                     probabilities.add(Utils.getValuesOfPostConditions(rules));
                     as = traces.get(i);
                     index = getIndexOfTargetRule(as);
@@ -189,6 +206,12 @@ public class HybridModelUpdator {
                 }
             } else {
                 rules = Utils.copyRules(tmp_rules);
+                Rule real_targetRule = getSameRule(targetRule);
+                if (isNecessaryOfUpdatingEnvironmentModel_SGD(real_targetRule)) {
+                    DomainModelGenerator generator = new DomainModelGenerator();
+                    generator.generate(rules, SGD_THRESHOLD, i, "SGD");
+                    this.domainModelUpdatedCount++;
+                }
             }
             probabilities.add(Utils.getValuesOfPostConditions(rules));
             //tmp_rules = Utils.copyRules(rules);
@@ -300,5 +323,44 @@ public class HybridModelUpdator {
             array[i-start] = tmp_probabilities.get(i).get(j);
         }
         return array;
+    }
+    
+    private boolean isNecessaryOfUpdatingEnvironmentModel_GD() {
+        for (Rule rule : rules) {
+            for (Condition post : rule.getPostConditions()) {
+                double value = post.getValue();
+                double preValue = post.getPreValue();
+                if ((value-GD_THRESHOLD)*(preValue-GD_THRESHOLD) < 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    private boolean isNecessaryOfUpdatingEnvironmentModel_SGD(Rule rule) {
+        for (Condition post : rule.getPostConditions()) {
+            double value = post.getValue();
+            double preValue = post.getPreValue();
+            if (preValue == 0.5 || value == 0.5) {
+                continue;
+            }
+            if ((value-SGD_THRESHOLD)*(preValue-SGD_THRESHOLD) < 0) {
+                System.out.println(rule.getPreConditionName()+" "+rule.getActionName()+" "+post.getName());
+                System.out.println(post.getPreValue()+" "+post.getValue());
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    private Rule getSameRule(Rule rule) {
+        for (Rule real_rule : rules) {
+            if (real_rule.getPreConditionName().equals(rule.getPreConditionName()) && 
+                    real_rule.getActionName().equals(rule.getActionName())) {
+                return real_rule;
+            }
+        }
+        return null;
     }
 }

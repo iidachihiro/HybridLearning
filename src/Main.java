@@ -166,14 +166,45 @@ public class Main {
     
     private static void doExperiment5_2(List<Rule> rules, List<ActionSet> sets) {
         SGDModelUpdator SGDUpdator = new SGDModelUpdator(rules);
+        long startTime_SGD = System.nanoTime();
         SGDUpdator.learn(sets,  "experiment1");
+        long endTime_SGD = System.nanoTime();
+        System.out.println("SGD: "+SGDUpdator.getDomainModelUpdatedCount()+" updated.");
+        printPartition(80);
+        
+        
+        
+        
         rules = Utils.readBaseRules();
         GDModelUpdator GDUpdator = new GDModelUpdator(rules);
+        long startTime_GD = System.nanoTime();
         GDUpdator.learn(sets,  "experiment1");
+        long endTime_GD = System.nanoTime();
+        System.out.println("GD: "+GDUpdator.getDomainModelUpdatedCount()+" updated.");
+        printPartition(80);
+        
+        
+        
+        
         rules = Utils.readBaseRules();
         HybridModelUpdator HUpdator = new HybridModelUpdator(rules);
+        long startTime_H = System.nanoTime();
         HUpdator.learn3(sets);
+        long endTime_H = System.nanoTime();
+        System.out.println("Hybrid: "+HUpdator.getDomainModelUpdatedCount()+" updated.");
         Utils.outputErrorValues_EX5(HUpdator, SGDUpdator, GDUpdator);
+ 
+        Utils.outputResultE5(SGDUpdator.getDomainModelUpdatedCount(), GDUpdator.getDomainModelUpdatedCount(), HUpdator.getDomainModelUpdatedCount()
+                , endTime_SGD-startTime_SGD, endTime_GD-startTime_GD, endTime_H-startTime_H);
+        
         System.out.println("experiment5 finished.");
+    }
+    
+    private static void printPartition(int n) {
+        while (n > 0) {
+            System.out.print("*");
+            n--;
+        }
+        System.out.println("");
     }
 }
