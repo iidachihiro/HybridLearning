@@ -20,6 +20,8 @@ public class HybridModelUpdator {
     private List<List<Double>> probabilities;
     private List<List<Double>> tmp_probabilities;
     
+    private List<Double> prob_large;
+    
     private int LEARNING_SIZE;
     
     private double SGD_THRESHOLD;
@@ -48,6 +50,10 @@ public class HybridModelUpdator {
     
     public List<List<Double>> getTmpProbabilities() {
         return this.tmp_probabilities;
+    }
+    
+    public List<Double> getProbLarge() {
+        return prob_large;
     }
     
     public List<Rule> getRules() {
@@ -218,6 +224,88 @@ public class HybridModelUpdator {
         }
     }
     
+    public void learn3large(List<ActionSet> sets) {
+        GDUtils.setLearningSize(6000);
+        this.LEARNING_SIZE = 6000;
+        windowSize = LEARNING_SIZE / 20;
+        List<Rule> tmp_rules = Utils.copyRules(rules); // for detecting environment change
+        this.traces = sets;
+        probabilities = new ArrayList<>();
+        probabilities.add(Utils.getValuesOfPostConditions(rules));
+        tmp_probabilities = new ArrayList<>();
+        tmp_probabilities.add(Utils.getValuesOfPostConditions(tmp_rules));
+        for (int i = 0; i < sets.size(); i++) {
+            ActionSet as = traces.get(i);
+            int index  = getIndexOfTargetRule(as);
+            Rule targetRule = tmp_rules.get(index);
+            targetRule = StochasticGradientDescent.getUpdatedRule(targetRule, as.getPostMonitorableAction());
+            tmp_probabilities.add(Utils.getValuesOfPostConditions(tmp_rules));
+            if (detectEnvironmentalChangeFromDetToNonDet()) {
+                int changePoint = i;
+                while (!detectEnvironmentalChangeFromNonDetToDet()) {
+                    i++;
+                    if (i >= traces.size()) {
+                        break;
+                    }
+                    List<ActionSet> targetTraces = getTargetActionSet(changePoint, i);
+                    rules = GradientDescent.getUpdatedRules(rules, targetTraces);
+                    if (isNecessaryOfUpdatingEnvironmentModel_GD()) {
+                        /*
+                        DomainModelGenerator generator = new DomainModelGenerator();
+                        generator.generate(rules, GD_THRESHOLD, i, "GD");
+                        */
+                        this.domainModelUpdatedCount++;
+                    }
+                    probabilities.add(Utils.getValuesOfPostConditions(rules));
+                    as = traces.get(i);
+                    index = getIndexOfTargetRule(as);
+                    targetRule = tmp_rules.get(index);
+                    targetRule = StochasticGradientDescent.getUpdatedRule(targetRule, as.getPostMonitorableAction());
+                    tmp_probabilities.add(Utils.getValuesOfPostConditions(tmp_rules));
+                    /*
+                    if (convergence(rules)) {
+                        break;
+                    }
+                    */
+                    // tentative
+                    boolean flag = false;
+                    if (i >= changePoint+LEARNING_SIZE) {
+                        while(!flag) {
+                            i++;
+                            if (i >= traces.size()) {
+                                break;
+                            }
+                            probabilities.add(Utils.getValuesOfPostConditions(rules));
+                            as = traces.get(i);
+                            index = getIndexOfTargetRule(as);
+                            targetRule = tmp_rules.get(index);
+                            targetRule = StochasticGradientDescent.getUpdatedRule(targetRule, as.getPostMonitorableAction());
+                            tmp_probabilities.add(Utils.getValuesOfPostConditions(tmp_rules));
+                            if (detectEnvironmentalChangeFromNonDetToDet()) {
+                                flag = true;
+                            }
+                        }
+                    }
+                    if (flag) {
+                        break;
+                    }
+                }
+            } else {
+                rules = Utils.copyRules(tmp_rules);
+                Rule real_targetRule = getSameRule(targetRule);
+                if (isNecessaryOfUpdatingEnvironmentModel_SGD(real_targetRule)) {
+                    /*
+                    DomainModelGenerator generator = new DomainModelGenerator();
+                    generator.generate(rules, SGD_THRESHOLD, i, "SGD");
+                    */
+                    this.domainModelUpdatedCount++;
+                }
+            }
+            probabilities.add(Utils.getValuesOfPostConditions(rules));
+            //tmp_rules = Utils.copyRules(rules);
+        }
+    }
+    
     private List<ActionSet> getTargetActionSet(int changePoint, int index) {
         List<ActionSet> target = new ArrayList<>();
         for (int i = changePoint; i < index; i++) {
@@ -336,7 +424,7 @@ public class HybridModelUpdator {
             }
         }
         return false;
-    }
+    } 
     
     private boolean isNecessaryOfUpdatingEnvironmentModel_SGD(Rule rule) {
         for (Condition post : rule.getPostConditions()) {

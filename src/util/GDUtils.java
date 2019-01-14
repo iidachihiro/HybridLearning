@@ -98,6 +98,10 @@ public class GDUtils extends Utils {
         return LEARNING_SIZE;
     }
     
+    public static void setLearningSize(int size) {
+        LEARNING_SIZE = size;
+    }
+    
     public static void reflesh() {
         String[] paths = {resultPath, domainPath, probabilityTablePath};
         for (String path : paths) {

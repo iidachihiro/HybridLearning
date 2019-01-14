@@ -704,7 +704,7 @@ public class Utils {
                 valueDir.mkdirs();
             }
             
-            int GD_LEARNING_SIZE = GDUtils.getLearningSize();
+            int GD_LEARNING_SIZE = GDUpdator.getLearningSize();
             List<List<Double>> HProbabilities = HUpdator.getProbabilities();
             List<List<Double>> SGDProbabilities = SGDUpdator.getProbabilities();
             List<List<Double>> GDProbabilities = GDUpdator.getProbabilities();
@@ -816,7 +816,7 @@ public class Utils {
         return values;
     }
     
-    public static void outputResultE5(int SGD_count, int GD_count, int H_count, double SGD_time, double GD_time, double H_time) {
+    public static void outputResultEX5(int SGD_count, int GD_count, int H_count, double SGD_time, double GD_time, double H_time) {
         try {
             String filePath = outputPath+"ex5/EX5Result.txt";
             File file = new File(filePath);
@@ -846,7 +846,161 @@ public class Utils {
         }
     }
     
+    public static void outputResultLarge(int SGD_count, int GD_count, int H_count, double SGD_time, double GD_time, double H_time) {
+        try {
+            String filePath = outputPath+"ResultLarge.txt";
+            File file = new File(filePath);
+            PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+            pw.println("Large Result");
+            pw.println("**************************************************");
+            pw.println("configuration");
+            pw.println("SGD Learning Rate = "+SGDUtils.getLearningRate());
+            pw.println("SGD Threshold = "+SGDUtils.getThreshold());
+            pw.println("GD Learning Rate = "+GDUtils.getLearningRate());
+            pw.println("GD Threshold = "+GDUtils.getThreshold());
+            pw.println("**************************************************");
+            pw.println("SGD");
+            pw.println("updated count = "+SGD_count);
+            pw.println("time = "+nanoToSec(SGD_time)+" sec");
+            pw.println("**************************************************");
+            pw.println("GD");
+            pw.println("updated count = "+GD_count);
+            pw.println("time = "+nanoToSec(GD_time)+" sec");
+            pw.println("**************************************************");
+            pw.println("Hybrid");
+            pw.println("updated count = "+H_count);
+            pw.println("time = "+nanoToSec(H_time)+" sec");
+            pw.close();
+        } catch (IOException e) {
+            System.err.println(e.toString());
+        }
+    }
+    
     public static double nanoToSec(double time) {
         return time/Math.pow(10, 9);
+    }
+    
+    public static void outputErrorValuesLarge(String _name, HybridModelUpdator HUpdator, SGDModelUpdator SGDUpdator, GDModelUpdator GDUpdator) {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(new File(trueProbabilityPath)));
+            // read true probability file
+            String line = br.readLine();
+            String[] strs = line.split(",");
+            int num = Integer.valueOf(strs[0]);
+            int[] points = new int[strs.length-1];
+            for (int i = 1; i < strs.length; i++) {
+                points[i-1] = Integer.valueOf(strs[i]);
+            }
+            double[][] true_probabilities = new double[num][points.length];
+            for (int i = 0; i < num; i++) {
+                line = br.readLine();
+                strs = line.split(",");
+                for (int j = 0; j < points.length; j++) {
+                    true_probabilities[i][j] = Double.valueOf(strs[j+1]);
+                }
+            }
+            br.close();
+            // write
+            File exLargeDir = new File(outputPath+_name+"/");
+            if (!exLargeDir.exists()) {
+                exLargeDir.mkdirs();
+            }
+            File errorDir = new File(exLargeDir.getAbsolutePath()+"/error/");
+            if (!errorDir.exists()) {
+                errorDir.mkdirs();
+            }
+            File valueDir = new File(exLargeDir.getAbsolutePath()+"/value/");
+            if (!valueDir.exists()) {
+                valueDir.mkdirs();
+            }
+            
+            int GD_LEARNING_SIZE = GDUpdator.getLearningSize();
+            List<List<Double>> HProbabilities = HUpdator.getProbabilities();
+            List<List<Double>> SGDProbabilities = SGDUpdator.getProbabilities();
+            List<List<Double>> GDProbabilities = GDUpdator.getProbabilities();
+            if (HProbabilities.size() != SGDProbabilities.size() || HProbabilities.size() != GDProbabilities.size()+GD_LEARNING_SIZE) {
+                System.out.println("size is different!!!!!!");
+            }
+            int index = 0;
+            int size = HProbabilities.size();
+            for (Rule rule : HUpdator.getRules()) {
+                String preCondName = rule.getPreConditionName();
+                String actName = rule.getActionName();
+                for (Condition post : rule.getPostConditions()) {
+                    String postCondName = post.getName();
+                    String path = errorDir.getAbsolutePath()+"/"+preCondName+"_"+actName+"_"+postCondName+".csv";
+                    PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(new File(path))));
+                    pw.println("ActionSet,SGD,GD,Hybrid");
+                    int point_index = 1;
+                    for (int i = 1; i < size; i++) {
+                        if (point_index < points.length && points[point_index] == i) {
+                            point_index++;
+                        }
+                        double HError = Math.abs(HProbabilities.get(i).get(index)-true_probabilities[index][point_index-1]);
+                        double SGDError = Math.abs(SGDProbabilities.get(i).get(index)-true_probabilities[index][point_index-1]);
+                        if (i < GD_LEARNING_SIZE) {
+                            pw.println(i+","+SGDError+",,"+HError);
+                        } else {
+                            double GDError = Math.abs(GDProbabilities.get(i-GD_LEARNING_SIZE).get(index)-true_probabilities[index][point_index-1]);
+                            pw.println(i+","+SGDError+","+GDError+","+HError);
+                        }
+                    }
+                    pw.close();
+                    index++;
+                }
+            }
+            index = 0;
+            for (Rule rule : HUpdator.getRules()) {
+                String preCondName = rule.getPreConditionName();
+                String actName = rule.getActionName();
+                for (Condition post : rule.getPostConditions()) {
+                    String postCondName = post.getName();
+                    String path = valueDir.getAbsolutePath()+"/"+preCondName+"_"+actName+"_"+postCondName+".csv";
+                    PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(new File(path))));
+                    pw.println("ActionSet,SGD,GD,Hybrid");
+                    int point_index = 1;
+                    for (int i = 1; i < size; i++) {
+                        if (point_index < points.length && points[point_index] == i) {
+                            point_index++;
+                        }
+                        double HValue = HProbabilities.get(i).get(index);
+                        double SGDValue = SGDProbabilities.get(i).get(index);
+                        if (i < GD_LEARNING_SIZE) {
+                            pw.println(i+","+SGDValue+",,"+HValue);
+                        } else {
+                            double GDValue = GDProbabilities.get(i-GD_LEARNING_SIZE).get(index);
+                            pw.println(i+","+SGDValue+","+GDValue+","+HValue);
+                        }
+                    }
+                    pw.close();
+                    index++;
+                }
+            }
+            
+            String valuesForEX5Path = outputPath+exLargeDir.getName()+"/values"+_name+".csv";
+            PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(new File(valuesForEX5Path))));
+            pw.print("ActionSet");
+            for (Rule rule : HUpdator.getRules()) {
+                String preCondName = rule.getPreConditionName();
+                String actName = rule.getActionName();
+                for (Condition post : rule.getPostConditions()) {
+                    String postCondName = post.getName();
+                    String name = preCondName+"_"+actName+"_"+postCondName;
+                    pw.print(","+name);
+                }
+            }
+            pw.println();
+            int i = 0;
+            for (List<Double> tmp : HUpdator.getTmpProbabilities()) {
+                pw.print(i++);
+                for (double t : tmp) {
+                    pw.print(","+t);
+                }
+                pw.println();
+            }
+            pw.close();
+        } catch (IOException e) {
+            System.err.println(e.toString());
+        }
     }
 }

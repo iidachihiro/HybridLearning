@@ -32,6 +32,10 @@ public class SGDModelUpdator {
         return this.domainModelUpdatedCount;
     }
     
+    public List<Rule> getRules() {
+        return this.rules;
+    }
+
     public void learn(List<ActionSet> traces) {
         int count = 1;
         for (ActionSet as : traces) {
@@ -66,6 +70,44 @@ public class SGDModelUpdator {
                 }
                 rules.set(index, targetRule);
                 SGDUtils.updateValuesOfRules(rules, count++);
+            }
+            SGDUtils.outputResult(rules, THRESHOLD);
+        } else if (exMode.equals("large1")) {
+            int count = 1;
+            SGDUtils.prepareValuesOfRules(rules);
+            for (ActionSet as : traces) {
+                int index = getIndexOfTargetRule(as);
+                Rule targetRule = rules.get(index);
+                targetRule = StochasticGradientDescent.getUpdatedRule(targetRule, as.getPostMonitorableAction());
+                probabilities.add(getValuesOfPostConditions());
+                if (isNecessaryOfUpdatingEnvironmentModel(targetRule)) {
+                    /*
+                    DomainModelGenerator generator = new DomainModelGenerator();
+                    generator.generate(rules, THRESHOLD, count, "SGD");
+                    */
+                    this.domainModelUpdatedCount++;
+                }
+                rules.set(index, targetRule);
+                SGDUtils.updateValuesOfRules(rules, count++);
+            }
+            SGDUtils.outputResult(rules, THRESHOLD);
+        } else if (exMode.equals("large2")) {
+            int count = 1;
+            SGDUtils.prepareValuesOfRules(rules);
+            for (ActionSet as : traces) {
+                int index = getIndexOfTargetRule(as);
+                Rule targetRule = rules.get(index);
+                targetRule = StochasticGradientDescent.getUpdatedRule(targetRule, as.getPostMonitorableAction());
+                probabilities.add(getValuesOfPostConditions());
+                if (isNecessaryOfUpdatingEnvironmentModel(targetRule)) {
+                    System.out.println("update");
+                    this.domainModelUpdatedCount++;
+                }
+                rules.set(index, targetRule);
+                SGDUtils.updateValuesOfRules(rules, count++);
+                if (count % 1000 == 0) {
+                    System.out.println("count is "+count);
+                }
             }
             SGDUtils.outputResult(rules, THRESHOLD);
         }

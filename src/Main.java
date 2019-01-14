@@ -39,6 +39,16 @@ public class Main {
             doExperiment5_1(rules, sets);
         } else if (args[0].equals("experiment5-2")) {
             doExperiment5_2(rules, sets);
+        } else if (args[0].equals("large1")) {
+            doExperimentLarge1(rules, sets);
+        } else if (args[0].equals("large2")) {
+            doExperimentLarge2(rules, sets);
+        } else if (args[0].equals("large3")) {
+            doExperimentLarge3(rules, sets);
+        } else if (args[0].equals("large")) {
+            if (args[1].equals("3_3")) {
+                doExperimentLarge_3_3(rules, sets);
+            }
         }
     }
     
@@ -194,10 +204,104 @@ public class Main {
         System.out.println("Hybrid: "+HUpdator.getDomainModelUpdatedCount()+" updated.");
         Utils.outputErrorValues_EX5(HUpdator, SGDUpdator, GDUpdator);
  
-        Utils.outputResultE5(SGDUpdator.getDomainModelUpdatedCount(), GDUpdator.getDomainModelUpdatedCount(), HUpdator.getDomainModelUpdatedCount()
+        Utils.outputResultEX5(SGDUpdator.getDomainModelUpdatedCount(), GDUpdator.getDomainModelUpdatedCount(), HUpdator.getDomainModelUpdatedCount()
                 , endTime_SGD-startTime_SGD, endTime_GD-startTime_GD, endTime_H-startTime_H);
         
         System.out.println("experiment5 finished.");
+    }
+    
+    private static void doExperimentLarge1(List<Rule> rules, List<ActionSet> sets) {
+        SGDModelUpdator SGDUpdator = new SGDModelUpdator(rules);
+        long startTime_SGD = System.nanoTime();
+        SGDUpdator.learn(sets,  "large1");
+        long endTime_SGD = System.nanoTime();
+        System.out.println("SGD: "+SGDUpdator.getDomainModelUpdatedCount()+" updated.");
+        printPartition(80);
+        
+        rules = Utils.readBaseRules();
+        GDModelUpdator GDUpdator = new GDModelUpdator(rules);
+        long startTime_GD = System.nanoTime();
+        GDUpdator.learn(sets,  "large1");
+        long endTime_GD = System.nanoTime();
+        System.out.println("GD: "+GDUpdator.getDomainModelUpdatedCount()+" updated.");
+        printPartition(80);
+        
+        rules = Utils.readBaseRules();
+        HybridModelUpdator HUpdator = new HybridModelUpdator(rules);
+        long startTime_H = System.nanoTime();
+        HUpdator.learn3large(sets);
+        long endTime_H = System.nanoTime();
+        System.out.println("Hybrid: "+HUpdator.getDomainModelUpdatedCount()+" updated.");
+        
+        System.out.println("SGD time: "+(endTime_SGD-startTime_SGD)/Math.pow(10,  9));
+        System.out.println("GD time: "+(endTime_GD-startTime_GD)/Math.pow(10,  9));
+        System.out.println("Hybrid time: "+(endTime_H-startTime_H)/Math.pow(10,  9));
+        
+        Utils.outputResultLarge(SGDUpdator.getDomainModelUpdatedCount(), GDUpdator.getDomainModelUpdatedCount(), HUpdator.getDomainModelUpdatedCount()
+                , endTime_SGD-startTime_SGD, endTime_GD-startTime_GD, endTime_H-startTime_H);
+    }
+    
+    private static void doExperimentLarge2(List<Rule> rules, List<ActionSet> sets) {
+        SGDModelUpdator SGDUpdator = new SGDModelUpdator(rules);
+        long startTime_SGD = System.nanoTime();
+        SGDUpdator.learn(sets,  "large2");
+        long endTime_SGD = System.nanoTime();
+        System.out.println("SGD: "+SGDUpdator.getDomainModelUpdatedCount()+" updated.");
+        printPartition(80);
+        
+        rules = Utils.readBaseRules();
+        GDModelUpdator GDUpdator = new GDModelUpdator(rules);
+        long startTime_GD = System.nanoTime();
+        GDUpdator.learn(sets,  "large2");
+        long endTime_GD = System.nanoTime();
+        System.out.println("GD: "+GDUpdator.getDomainModelUpdatedCount()+" updated.");
+        printPartition(80);
+        
+        System.out.println("SGD time: "+(endTime_SGD-startTime_SGD)/Math.pow(10,  9));
+        System.out.println("GD time: "+(endTime_GD-startTime_GD)/Math.pow(10,  9));
+    }
+    
+    private static void doExperimentLarge3(List<Rule> rules, List<ActionSet> sets) {
+        HybridModelUpdator HUpdator = new HybridModelUpdator(rules);
+        long startTime_H = System.nanoTime();
+        HUpdator.learn3large(sets);
+        long endTime_H = System.nanoTime();
+        System.out.println("Hybrid: "+HUpdator.getDomainModelUpdatedCount()+" updated.");
+        
+        System.out.println("Hybrid time: "+(endTime_H-startTime_H)/Math.pow(10,  9));
+    }
+    
+    private static void doExperimentLarge_3_3(List<Rule> rules, List<ActionSet> sets) {
+        SGDModelUpdator SGDUpdator = new SGDModelUpdator(rules);
+        long startTime_SGD = System.nanoTime();
+        SGDUpdator.learn(sets,  "large1");
+        long endTime_SGD = System.nanoTime();
+        System.out.println("SGD: "+SGDUpdator.getDomainModelUpdatedCount()+" updated.");
+        printPartition(80);
+        
+        rules = Utils.readBaseRules();
+        GDModelUpdator GDUpdator = new GDModelUpdator(rules);
+        long startTime_GD = System.nanoTime();
+        GDUpdator.learn(sets,  "large1");
+        long endTime_GD = System.nanoTime();
+        System.out.println("GD: "+GDUpdator.getDomainModelUpdatedCount()+" updated.");
+        printPartition(80);
+        
+        rules = Utils.readBaseRules();
+        HybridModelUpdator HUpdator = new HybridModelUpdator(rules);
+        long startTime_H = System.nanoTime();
+        HUpdator.learn3large(sets);
+        long endTime_H = System.nanoTime();
+        System.out.println("Hybrid: "+HUpdator.getDomainModelUpdatedCount()+" updated.");
+        
+        System.out.println("SGD time: "+(endTime_SGD-startTime_SGD)/Math.pow(10,  9));
+        System.out.println("GD time: "+(endTime_GD-startTime_GD)/Math.pow(10,  9));
+        System.out.println("Hybrid time: "+(endTime_H-startTime_H)/Math.pow(10,  9));
+        
+        Utils.outputResultLarge(SGDUpdator.getDomainModelUpdatedCount(), GDUpdator.getDomainModelUpdatedCount(), HUpdator.getDomainModelUpdatedCount()
+                , endTime_SGD-startTime_SGD, endTime_GD-startTime_GD, endTime_H-startTime_H);
+        
+        Utils.outputErrorValuesLarge("large_3_3", HUpdator, SGDUpdator, GDUpdator);
     }
     
     private static void printPartition(int n) {

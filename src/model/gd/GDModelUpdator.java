@@ -72,6 +72,47 @@ public class GDModelUpdator {
                 GDUtils.updateValuesOfRules(rules, i);
             }
             GDUtils.outputResult(rules, THRESHOLD);
+        } else if (exMode.equals("large1")) {
+            GDUtils.setLearningSize(6000);
+            this.LEARNING_SIZE = 6000;
+            this.traces.add(null);
+            this.traces.addAll(sets);
+            GDUtils.prepareValuesOfRules(rules);
+            for (int i = LEARNING_SIZE; i < traces.size(); i++) {
+                List<ActionSet> targetTraces = getLearningTargetTraces(i);
+                this.rules = GradientDescent.getUpdatedRules(rules, targetTraces);
+                probabilities.add(getValuesOfPostConditions());
+                if (isNecessaryOfUpdatingEnvironmentModel()) {
+                    /*
+                    DomainModelGenerator generator = new DomainModelGenerator();
+                    generator.generate(rules, THRESHOLD, i, "GD");
+                    */
+                    this.domainModelUpdatedCount++;
+                }
+                GDUtils.updateValuesOfRules(rules, i);
+            }
+            GDUtils.outputResult(rules, THRESHOLD);
+        } else if (exMode.equals("large2")) {
+            GDUtils.setLearningSize(10000);
+            this.LEARNING_SIZE = 10000;
+            
+            this.traces.add(null);
+            this.traces.addAll(sets);
+            GDUtils.prepareValuesOfRules(rules);
+            for (int i = LEARNING_SIZE; i < traces.size(); i++) {
+                List<ActionSet> targetTraces = getLearningTargetTraces(i);
+                this.rules = GradientDescent.getUpdatedRules(rules, targetTraces);
+                probabilities.add(getValuesOfPostConditions());
+                if (isNecessaryOfUpdatingEnvironmentModel()) {
+                    System.out.println("update");
+                    this.domainModelUpdatedCount++;
+                }
+                GDUtils.updateValuesOfRules(rules, i);
+                if (i % 1000 == 0) {
+                    System.out.println("count is "+i);
+                }
+            }
+            GDUtils.outputResult(rules, THRESHOLD);
         }
     }
     
